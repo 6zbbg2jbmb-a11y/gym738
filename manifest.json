@@ -3,10 +3,10 @@
   "short_name": "GYM738",
   "description": "Дневник тренировок с двойной прогрессией весов и таймером отдыха (Upper / Lower 4 дня)",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#090d16",
   "theme_color": "#090d16",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "apple-touch-icon.png",
