@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GYM738" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>GYM738 — Дневник тренировок (Upper / Lower)</title>
+  <script src="tailwind.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      background-color: #090d16;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .set-done {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.14) 0%, rgba(16, 185, 129, 0.04) 100%);
+      border-color: rgba(16, 185, 129, 0.35) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-emerald-500 selection:text-slate-950">
+
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/80 px-3 pt-3 pb-2">
+    <div class="max-w-lg mx-auto">
+      <div class="flex items-center justify-between gap-2 mb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm">
+            UL
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-sm font-bold tracking-tight text-white leading-none">GYM738 • Upper/Lower</h1>
+              <span id="saveStatusBadge" class="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400">✓ Автосохранение</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">183 см • <span id="headerCurrentWeight">73.0</span> кг • Двойная прогрессия</p>
+          </div>
+        </div>
+
+        <!-- Week selector + Backup menu -->
+        <div class="flex items-center gap-1.5">
+          <select id="weekSelect" onchange="changeWeek(this.value)" class="bg-slate-800/90 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500">
+          </select>
+          <button onclick="openDataModal()" title="Экспорт / Сохранение" class="p-1.5 rounded-lg bg-slate-800/90 border border-slate-700 text-slate-300 hover:text-white active:scale-95 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5" id="dayTabs">
+        <button onclick="selectTab('upperA')" id="tab-upperA" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Пн: Верх А
+        </button>
+        <button onclick="selectTab('lowerA')" id="tab-lowerA" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Вт: Низ А
+        </button>
+        <button onclick="selectTab('upperB')" id="tab-upperB" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Чт: Верх Б
+        </button>
+        <button onclick="selectTab('lowerB')" id="tab-lowerB" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Пт: Низ Б
+        </button>
+        <button onclick="selectTab('nutrition')" id="tab-nutrition" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          ⚖️ Вес и КБЖУ
+        </button>
+        <button onclick="selectTab('stats')" id="tab-stats" class="tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          📈 Сводка
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-lg mx-auto px-3 pt-3" id="mainContainer">
+  </main>
+
+  <!-- Floating Bottom Rest Timer Bar -->
+  <div class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2.5" style="padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));">
+    <div class="max-w-lg mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <button id="timerToggleBtn" onclick="toggleTimer()" class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 font-bold flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-95 transition">
+          <svg id="timerPlayIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="timerDisplay" class="font-mono text-xl font-bold text-white tabular-nums tracking-tight">02:30</span>
+            <span id="timerStatusLabel" class="text-[11px] text-slate-400">Таймер отдыха</span>
+          </div>
+          <div class="w-32 h-1 bg-slate-800 rounded-full overflow-hidden mt-0.5">
+            <div id="timerProgressBar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick preset buttons -->
+      <div class="flex items-center gap-1">
+        <button onclick="setTimerPreset(90)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-medium text-slate-300 active:scale-95">1:30</button>
+        <button onclick="setTimerPreset(120)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-medium text-slate-300 active:scale-95">2:00</button>
+        <button onclick="setTimerPreset(150)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-medium text-slate-300 active:scale-95">2:30</button>
+        <button onclick="setTimerPreset(180)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-medium text-slate-300 active:scale-95">3:00</button>
+        <button onclick="adjustTimer(30)" class="px-2 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700 text-[11px] font-semibold text-emerald-400 active:scale-95">+30с</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data / Backup / Export Modal -->
+  <div id="dataModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <h3 class="text-sm font-bold text-white">Резервная копия и Экспорт в таблицу</h3>
+        <button onclick="closeDataModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Все твои записи автоматически сохраняются в памяти телефона (<code class="text-emerald-400">localStorage</code>). Здесь можно выгрузить CSV-таблицу для Excel / Google Sheets или сохранить резервную копию.
+      </p>
+      <div class="grid grid-cols-1 gap-2">
+        <button onclick="exportCSV()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/25 transition flex items-center justify-center gap-2">
+          📊 Скачать таблицу тренировок (.CSV для Excel/Sheets)
+        </button>
+        <button onclick="exportJSON()" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center gap-2">
+          💾 Скачать полный бэкап (.JSON)
+        </button>
+        <label class="w-full py-2.5 px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer">
+          📂 Загрузить бэкап (.JSON)
+          <input type="file" accept=".json" onchange="importJSON(event)" class="hidden" />
+        </label>
+        <button onclick="resetAllData()" class="w-full py-2 px-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium hover:bg-rose-500/20 transition mt-2">
+          Очистить все записи
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. ПРОГРАММА ТРЕНИРОВОК (UPPER / LOWER)
+    // ==========================================
+    const PROGRAM = {
+      upperA: {
+        id: 'upperA',
+        title: 'День 1: Верх А (Пн)',
+        subtitle: 'Акцент на базовую силу и толщину верха',
+        warmupNote: 'Перед первым упражнением на группу мышц сделай 2–3 разминочных подхода с постепенным ростом веса без утомления.',
+        exercises: [
+          {
+            id: 'ua_bench',
+            name: 'Жим штанги лежа на горизонтальной скамье',
+            sets: 3,
+            minReps: 5,
+            maxReps: 8,
+            rir: 'RIR 2',
+            restSec: 180,
+            restLabel: '3 мин',
+            muscle: 'Грудь / Трицепс',
+            note: 'Главный драйвер силового прогресса жимовой группы. Оставляй 2 повторения в запасе.'
+          },
+          {
+            id: 'ua_row',
+            name: 'Тяга штанги или Т-грифа в наклоне (с упором грудью)',
+            variants: ['Тяга Т-грифа с упором грудью', 'Тяга штанги в наклоне'],
+            sets: 3,
+            minReps: 6,
+            maxReps: 10,
+            rir: 'RIR 1–2',
+            restSec: 150,
+            restLabel: '2.5 мин',
+            muscle: 'Спина (толщина)',
+            note: 'Упор грудью снимает читинг поясницей и направляет 100% нагрузки в верх спины и широчайшие.'
+          },
+          {
+            id: 'ua_ohp_db',
+            name: 'Жим гантелей сидя (угол 75–80°)',
+            sets: 3,
+            minReps: 8,
+            maxReps: 10,
+            rir: 'RIR 1–2',
+            restSec: 150,
+            restLabel: '2.5 мин',
+            muscle: 'Дельты',
+            note: 'Глубокое опускание гантелей дает максимальное растяжение передней и средней дельты.'
+          },
+          {
+            id: 'ua_lat_pulldown',
+            name: 'Тяга верхнего блока к груди',
+            variants: ['Тяга верхнего блока широким хватом', 'Тяга верхнего блока средним хватом'],
+            sets: 3,
+            minReps: 8,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Широчайшие',
+            note: 'В верхней точке позволяй лопаткам тянуться вверх за рукоятью для растяжения широчайших.'
+          },
+          {
+            id: 'ua_incline_curl',
+            name: 'Сгибания рук сидя на наклонной (45–60°) / блок за спиной',
+            variants: ['Сгибания с гантелями на наклонной 45–60°', 'Сгибания с нижнего блока стоя спиной'],
+            sets: 3,
+            minReps: 8,
+            maxReps: 12,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Бицепс (длинная головка)',
+            note: 'Отведение локтя за корпус максимально натягивает длинную головку бицепса. Последний подход можно в отказ.'
+          },
+          {
+            id: 'ua_overhead_ext',
+            name: 'Разгибания рук на блоке с канатом из-за головы',
+            sets: 3,
+            minReps: 10,
+            maxReps: 12,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Трицепс (длинная головка)',
+            note: 'Прямой прицел в длинную головку трицепса в растянутой позиции (в 1.5 раза больше роста, чем жим книзу).'
+          }
+        ]
+      },
+      lowerA: {
+        id: 'lowerA',
+        title: 'День 2: Низ А (Вт)',
+        subtitle: 'Акцент на квадрицепс и базовую силу ног',
+        warmupNote: 'Тщательно разомни тазобедренные и коленные суставы + 2–3 разминочных подхода в приседе.',
+        exercises: [
+          {
+            id: 'la_squat',
+            name: 'Приседания со штангой (или глубокий Гакк-присед)',
+            variants: ['Приседания со штангой на спине', 'Глубокие Гакк-приседания'],
+            sets: 3,
+            minReps: 5,
+            maxReps: 8,
+            rir: 'RIR 2',
+            restSec: 210,
+            restLabel: '3–4 мин',
+            muscle: 'Квадрицепс / Ягодицы',
+            note: 'Опускайся максимально глубоко (ниже параллели, пока сохраняется нейтральная спина) — внизу главный стимул.'
+          },
+          {
+            id: 'la_rdl',
+            name: 'Румынская тяга со штангой (с лямками)',
+            sets: 3,
+            minReps: 8,
+            maxReps: 10,
+            rir: 'RIR 2',
+            restSec: 180,
+            restLabel: '3 мин',
+            muscle: 'Бицепс бедра / Ягодицы',
+            note: 'Движение строго за счет отведения таза назад, штанга скользит по ногам до середины голени. Жесткое натяжение.'
+          },
+          {
+            id: 'la_leg_press',
+            name: 'Жим ногами в тренажере (стопы внизу платформы)',
+            sets: 3,
+            minReps: 10,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 150,
+            restLabel: '2.5 мин',
+            muscle: 'Квадрицепс',
+            note: 'Узкая или средняя постановка ног в нижней части платформы для максимального сгибания колена.'
+          },
+          {
+            id: 'la_seated_curl',
+            name: 'Сгибания ног в тренажере СИДЯ',
+            sets: 3,
+            minReps: 10,
+            maxReps: 15,
+            rir: 'RIR 0–1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Бицепс бедра',
+            note: 'Сидячий вариант натягивает бицепс бедра через тазобедренный сустав и дает на 30–40% больше роста, чем лежа.'
+          },
+          {
+            id: 'la_calf_standing',
+            name: 'Подъемы на носки стоя (в тренажере или Смите)',
+            sets: 4,
+            minReps: 10,
+            maxReps: 15,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Икры',
+            note: 'Главный секрет икр: пауза 2 секунды в нижней точке в полном растяжении (убирает рефлекс ахилла).'
+          },
+          {
+            id: 'la_abs',
+            name: 'Скручивания на блоке («Молитва») / Подъемы ног в висе',
+            variants: ['Скручивания на верхнем блоке («Молитва»)', 'Подъемы ног в висе'],
+            sets: 3,
+            minReps: 10,
+            maxReps: 15,
+            rir: 'RIR 1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Пресс',
+            note: 'Контролируемое округление позвоночника под нагрузкой, без рывков бедрами.'
+          }
+        ]
+      },
+      upperB: {
+        id: 'upperB',
+        title: 'День 3: Верх Б (Чт)',
+        subtitle: 'Гипертрофия, верх груди и ширина плеч',
+        warmupNote: '2–3 разминочных подхода перед жимом и подтягиваниями. Фокус на глубоком растяжении в нижней точке.',
+        exercises: [
+          {
+            id: 'ub_incline_db',
+            name: 'Жим гантелей на наклонной скамье (угол 30°)',
+            sets: 3,
+            minReps: 8,
+            maxReps: 10,
+            rir: 'RIR 1–2',
+            restSec: 165,
+            restLabel: '2.5–3 мин',
+            muscle: 'Верх груди',
+            note: 'Угол строго 30° оптимален для ключичного пучка груди без перегрузки передней дельты. Опускай гантели глубоко.'
+          },
+          {
+            id: 'ub_pullups',
+            name: 'Подтягивания (с доп. весом или своим весом)',
+            sets: 3,
+            minReps: 6,
+            maxReps: 10,
+            rir: 'RIR 1–2',
+            restSec: 165,
+            restLabel: '2.5–3 мин',
+            muscle: 'Широчайшие / Плечелучевая',
+            note: 'Если делаешь со своим весом — пиши 0 кг (или свой вес 73 кг) и фиксируй повторения.'
+          },
+          {
+            id: 'ub_dips_hammer',
+            name: 'Отжимания на брусьях с весом / Жим в Хаммере',
+            variants: ['Отжимания на брусьях с весом (наклон вперед)', 'Жим от груди в Хаммере'],
+            sets: 3,
+            minReps: 8,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Низ/середина груди и трицепс',
+            note: 'На брусьях наклоняй корпус вперед и уходи в комфортное глубокое растяжение.'
+          },
+          {
+            id: 'ub_cable_row',
+            name: 'Тяга горизонтального блока к поясу',
+            sets: 3,
+            minReps: 10,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Середина спины / Трапеции',
+            note: 'На негативной фазе подавай плечи слегка вперед, растягивая ромбовидные и трапециевидные мышцы.'
+          },
+          {
+            id: 'ub_cable_lateral',
+            name: 'Отведения (махи) руки в сторону на нижнем блоке',
+            sets: 4,
+            minReps: 12,
+            maxReps: 15,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Средняя дельта',
+            note: 'Кабель на уровне кисти или бедра дает пиковую нагрузку на среднюю дельту именно в нижней растянутой точке.'
+          },
+          {
+            id: 'ub_preacher_curl',
+            name: 'Сгибания рук с EZ-штангой на скамье Скотта',
+            sets: 3,
+            minReps: 8,
+            maxReps: 12,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Бицепс / Брахиалис',
+            note: 'Создает пиковый крутящий момент в нижней части амплитуды (при почти прямых руках). Опускай плавно!'
+          }
+        ]
+      },
+      lowerB: {
+        id: 'lowerB',
+        title: 'День 4: Низ Б (Пт)',
+        subtitle: 'Задняя цепь, детализация ног и руки',
+        warmupNote: 'Выбери первое упражнение под цель: Болгарские сплит-приседы (чистая гипертрофия без утомления поясницы) или Становая тяга (силовая база).',
+        exercises: [
+          {
+            id: 'lb_main',
+            name: 'Болгарские сплит-приседания ИЛИ Становая тяга',
+            variants: ['Болгарские сплит-приседы с гантелями (8–10 повт)', 'Становая тяга классика/трэп-гриф (5–6 повт)'],
+            sets: 3,
+            minReps: 8,
+            maxReps: 10,
+            altMinReps: 5,
+            altMaxReps: 6,
+            rir: 'RIR 2',
+            restSec: 180,
+            restLabel: '3 мин',
+            muscle: 'Ягодицы / Бедра / Задняя цепь',
+            note: 'Болгарские: 3×8–10 на каждую ногу глубоко. Становая: 3×5–6 на силу.'
+          },
+          {
+            id: 'lb_leg_ext',
+            name: 'Разгибания ног в тренажере сидя',
+            sets: 3,
+            minReps: 10,
+            maxReps: 15,
+            rir: 'RIR 0–1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Квадрицепс (прямая мышца бедра)',
+            note: 'Отодвинь спинку чуть назад (угол в тазу > 90°) — это полноценно включает прямую мышцу бедра.'
+          },
+          {
+            id: 'lb_hyper_curl',
+            name: 'Гиперэкстензия с весом / Сгибания ног',
+            variants: ['Гиперэкстензия с весом (круглая спина)', 'Сгибания ног сидя/лежа'],
+            sets: 3,
+            minReps: 10,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Бицепс бедра / Ягодицы',
+            note: 'В гиперэкстензии слегка скругли верх спины и тянись за счет сжатия ягодиц и бицепса бедра.'
+          },
+          {
+            id: 'lb_skullcrusher',
+            name: 'Французский жим с EZ-штангой лежа (за голову)',
+            sets: 3,
+            minReps: 8,
+            maxReps: 12,
+            rir: 'RIR 1',
+            restSec: 120,
+            restLabel: '2 мин',
+            muscle: 'Трицепс',
+            note: 'Опускай гриф за голову, а не ко лбу — это снимает нагрузку с локтей и растягивает длинную головку.'
+          },
+          {
+            id: 'lb_facepull',
+            name: 'Тяга каната к лицу (Face Pull) / Обратный Пек-Дек',
+            variants: ['Тяга каната к лицу (Face Pull)', 'Обратные разведения в Пек-Дек'],
+            sets: 3,
+            minReps: 12,
+            maxReps: 15,
+            rir: 'RIR 1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Задняя дельта / Ротаторы плеча',
+            note: 'Держи локти высоко, работай задней дельтой без сведения лопаток корпусом.'
+          },
+          {
+            id: 'lb_calf_press',
+            name: 'Подъемы на носки в тренажере для жима ногами',
+            sets: 3,
+            minReps: 12,
+            maxReps: 15,
+            rir: 'RIR 0–1',
+            restSec: 90,
+            restLabel: '1.5 мин',
+            muscle: 'Икры',
+            note: 'Обязательная пауза 2 секунды в нижней точке в полном растяжении.'
+          }
+        ]
+      }
+    };
+
+    // ==========================================
+    // 2. СОСТОЯНИЕ И ДВОЙНОЕ ХРАНИЛИЩЕ (LOCALSTORAGE + INDEXEDDB)
+    // ==========================================
+    const STORAGE_KEY = 'gym738_tracker_v1';
+    const IDB_NAME = 'gym738_idb';
+    const IDB_STORE = 'state_store';
+    let state = loadState();
+
+    // Запрашиваем у iOS / браузера защищенное постоянное хранилище
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().catch(() => {});
+    }
+
+    function openIDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject('No IDB');
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = e => reject(e);
+      });
+    }
+
+    function saveToIDB(data) {
+      openIDB().then(db => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(JSON.stringify(data), STORAGE_KEY);
+      }).catch(() => {});
+    }
+
+    function restoreFromIDBIfNeeded() {
+      openIDB().then(db => {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY);
+        req.onsuccess = () => {
+          if (req.result && !localStorage.getItem(STORAGE_KEY)) {
+            try {
+              state = Object.assign(getDefaultState(), JSON.parse(req.result));
+              localStorage.setItem(STORAGE_KEY, req.result);
+              initWeekSelect();
+              render();
+            } catch (e) {}
+          }
+        };
+      }).catch(() => {});
+    }
+
+    function getDefaultState() {
+      return {
+        currentWeek: 1,
+        currentTab: 'upperA',
+        selectedVariants: {},
+        workouts: {}, // key: `w${week}_${exerciseId}_s${setIndex}` -> { weight: '', reps: '', done: false }
+        notes: {},    // key: `w${week}_${exerciseId}` -> string
+        bodyWeight: {
+          // key: `w${week}_d${dayIdx}` (dayIdx 1..7) -> number
+        },
+        dailyChecklist: {
+          // key: `YYYY-MM-DD` -> { kcal: false, protein: false, creatine: false }
+        }
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultState();
+        return Object.assign(getDefaultState(), JSON.parse(raw));
+      } catch (e) {
+        return getDefaultState();
+      }
+    }
+
+    let saveFlashTimeout = null;
+    function saveState() {
+      try {
+        const serialized = JSON.stringify(state);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        saveToIDB(state);
+        const badge = document.getElementById('saveStatusBadge');
+        if (badge) {
+          badge.textContent = '💾 Сохранено';
+          badge.className = 'px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950 text-[10px] font-bold transition';
+          clearTimeout(saveFlashTimeout);
+          saveFlashTimeout = setTimeout(() => {
+            badge.textContent = '✓ В памяти';
+            badge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400 transition';
+          }, 900);
+        }
+      } catch (e) {
+        console.error('Save error', e);
+      }
+      updateHeaderWeight();
+    }
+
+    function getSetData(week, exId, setIdx) {
+      const key = `w${week}_${exId}_s${setIdx}`;
+      return state.workouts[key] || { weight: '', reps: '', done: false };
+    }
+
+    function setSetData(week, exId, setIdx, patch) {
+      const key = `w${week}_${exId}_s${setIdx}`;
+      const current = getSetData(week, exId, setIdx);
+      state.workouts[key] = Object.assign({}, current, patch);
+      saveState();
+    }
+
+    function getRepRange(ex) {
+      const variantIdx = state.selectedVariants[ex.id] || 0;
+      if (ex.id === 'lb_main' && variantIdx === 1) {
+        return { min: ex.altMinReps, max: ex.altMaxReps };
+      }
+      return { min: ex.minReps, max: ex.maxReps };
+    }
+
+    // ==========================================
+    // 3. АЛГОРИТМ ДВОЙНОЙ ПРОГРЕССИИ
+    // ==========================================
+    function evaluateProgression(week, ex) {
+      const range = getRepRange(ex);
+      const isDeload = (week % 8 === 0);
+
+      if (isDeload) {
+        return {
+          type: 'deload',
+          badge: '🔄 DELOAD НЕДЕЛЯ',
+          color: 'text-sky-300 bg-sky-500/15 border-sky-500/30',
+          advice: 'Снизь рабочий вес на 15–20% от прошлой недели и сделай 2 подхода вместо 3–4 без отказа.'
+        };
+      }
+
+      // Check current week sets
+      let curSets = [];
+      for (let s = 1; s <= ex.sets; s++) {
+        curSets.push(getSetData(week, ex.id, s));
+      }
+      const filledCur = curSets.filter(s => s.reps !== '' && Number(s.reps) > 0);
+
+      // Check if all sets in current week hit or exceeded maxReps
+      if (filledCur.length === ex.sets && filledCur.every(s => Number(s.reps) >= range.max)) {
+        const w = Number(filledCur[0].weight) || 0;
+        const nextW = w > 0 ? `${w + 2.5} кг` : 'больший вес';
+        return {
+          type: 'levelup',
+          badge: '🚀 ВЕРХ ЗАКРЫТ! +ВЕС НА СЛЕД. НЕДЕЛЕ',
+          color: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40',
+          advice: `Ты закрыл все ${ex.sets} подхода по ${range.max} повторений! На следующей тренировке бери ${nextW} и начинай с ${range.min} повторений.`
+        };
+      }
+
+      // Look at previous week (if week > 1, skip deload week if current is week 9)
+      const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
+      if (prevWeek >= 1) {
+        let prevSets = [];
+        for (let s = 1; s <= ex.sets; s++) {
+          prevSets.push(getSetData(prevWeek, ex.id, s));
+        }
+        const filledPrev = prevSets.filter(s => s.reps !== '' && Number(s.reps) > 0);
+        if (filledPrev.length > 0) {
+          const prevAllMax = filledPrev.length === ex.sets && filledPrev.every(s => Number(s.reps) >= range.max);
+          const prevWeight = filledPrev[0].weight || '?';
+          const prevRepsStr = prevSets.map(s => s.reps || '—').join(', ');
+
+          if (prevAllMax) {
+            const suggestedWeight = Number(prevWeight) ? (Number(prevWeight) + 2.5) : '';
+            return {
+              type: 'increase_weight_now',
+              badge: `🔥 ПОВЫШАЙ ВЕС СЕГОДНЯ (${suggestedWeight ? suggestedWeight + ' кг' : '+2–2.5 кг'})`,
+              color: 'text-amber-300 bg-amber-500/20 border-amber-500/40',
+              advice: `На Неделе ${prevWeek} ты закрыл верх (${prevWeight} кг × ${prevRepsStr}). Сегодня ставь новый вес и целься в ${range.min} повторений!`
+            };
+          } else {
+            return {
+              type: 'add_rep',
+              badge: `🎯 ЦЕЛЬ: +1 ПОВТОР (Было: ${prevWeight} кг × ${prevRepsStr})`,
+              color: 'text-indigo-300 bg-indigo-500/15 border-indigo-500/30',
+              advice: `Оставь вес ${prevWeight} кг и постарайся прибавить хотя бы +1 повторение в любом из подходов до верхней границы (${range.max}).`
+            };
+          }
+        }
+      }
+
+      return {
+        type: 'start',
+        badge: `Двойная прогрессия: ${ex.sets} × ${range.min}–${range.max} (${ex.rir})`,
+        color: 'text-slate-300 bg-slate-800/90 border-slate-700',
+        advice: `Подбери рабочий вес так, чтобы 1-й подход сделать на ~${range.max} раз с запасом (${ex.rir}).`
+      };
+    }
+
+    // ==========================================
+    // 4. РЕНДЕРИНГ ИНТЕРФЕЙСА
+    // ==========================================
+    function initWeekSelect() {
+      const sel = document.getElementById('weekSelect');
+      sel.innerHTML = '';
+      for (let w = 1; w <= 16; w++) {
+        const opt = document.createElement('option');
+        opt.value = w;
+        opt.textContent = (w % 8 === 0) ? `Неделя ${w} (Deload 🔄)` : `Неделя ${w}`;
+        if (w === Number(state.currentWeek)) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function changeWeek(val) {
+      state.currentWeek = Number(val);
+      saveState();
+      render();
+    }
+
+    function selectTab(tabId) {
+      state.currentTab = tabId;
+      saveState();
+      render();
+    }
+
+    function selectVariant(exId, idx) {
+      state.selectedVariants[exId] = Number(idx);
+      saveState();
+      render();
+    }
+
+    function updateHeaderWeight() {
+      const weights = Object.values(state.bodyWeight).filter(v => v && Number(v) > 0).map(Number);
+      const el = document.getElementById('headerCurrentWeight');
+      if (el) {
+        el.textContent = weights.length > 0 ? weights[weights.length - 1].toFixed(1) : '73.0';
+      }
+    }
+
+    function renderTabs() {
+      const tabs = ['upperA', 'lowerA', 'upperB', 'lowerB', 'nutrition', 'stats'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (!btn) return;
+        if (t === state.currentTab) {
+          btn.className = 'tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30 transition';
+        } else {
+          btn.className = 'tab-btn shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/70 transition';
+        }
+      });
+    }
+
+    function renderWorkoutDay(dayKey) {
+      const day = PROGRAM[dayKey];
+      const week = Number(state.currentWeek);
+      const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
+
+      // Count completed sets today
+      let totalSets = 0;
+      let doneSets = 0;
+      let totalVolume = 0;
+      day.exercises.forEach(ex => {
+        for (let s = 1; s <= ex.sets; s++) {
+          totalSets++;
+          const d = getSetData(week, ex.id, s);
+          if (d.done) doneSets++;
+          if (d.weight && d.reps) {
+            totalVolume += Number(d.weight) * Number(d.reps);
+          }
+        }
+      });
+
+      const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+
+      let html = `
+        <!-- Day Summary Card -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 mb-3 shadow-lg">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h2 class="text-base font-bold text-white">${day.title}</h2>
+              <p class="text-xs text-slate-400 mt-0.5">${day.subtitle}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-xs font-mono font-bold text-emerald-400">${doneSets}/${totalSets} подходов</span>
+              <div class="text-[11px] text-slate-400">Тоннаж: <b class="text-slate-200">${totalVolume.toLocaleString('ru-RU')} кг</b></div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2.5">
+            <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 flex items-start gap-1.5">
+            <span class="text-amber-400 shrink-0">⚡</span>
+            <span>${day.warmupNote}</span>
+          </p>
+        </div>
+
+        <div class="space-y-3">
+      `;
+
+      day.exercises.forEach((ex, idx) => {
+        const range = getRepRange(ex);
+        const prog = evaluateProgression(week, ex);
+        const variantIdx = state.selectedVariants[ex.id] || 0;
+        const displayName = ex.variants ? ex.variants[variantIdx] : ex.name;
+
+        html += `
+          <div class="bg-slate-900/95 border border-slate-800/90 rounded-2xl p-3.5 shadow-md" id="card-${ex.id}">
+            <!-- Exercise Header -->
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <div class="flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-emerald-400 border border-slate-700">#${idx + 1}</span>
+                  <span class="text-[11px] font-medium text-slate-400">${ex.muscle}</span>
+                  <span class="text-[11px] text-slate-500">•</span>
+                  <button onclick="setTimerPreset(${ex.restSec}, true)" class="text-[11px] font-semibold text-sky-400 hover:underline flex items-center gap-0.5">
+                    ⏱ Отдых ${ex.restLabel}
+                  </button>
+                </div>
+                <h3 class="text-sm font-bold text-white mt-1 leading-snug">${displayName}</h3>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="inline-block px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-white">
+                  ${ex.sets} × ${range.min}–${range.max}
+                </span>
+                <div class="text-[10px] font-semibold text-amber-400/90 mt-0.5">${ex.rir}</div>
+              </div>
+            </div>
+
+            <!-- Variant Switcher if applicable -->
+            ${ex.variants ? `
+              <div class="flex gap-1 mb-2.5 bg-slate-950/70 p-1 rounded-xl border border-slate-800/80">
+                ${ex.variants.map((v, vIdx) => `
+                  <button onclick="selectVariant('${ex.id}', ${vIdx})" class="flex-1 py-1 px-2 rounded-lg text-[11px] font-medium transition truncate ${variantIdx === vIdx ? 'bg-slate-800 text-emerald-400 font-semibold border border-slate-700' : 'text-slate-400 hover:text-slate-200'}">
+                    ${v}
+                  </button>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <!-- Biomechanics tip -->
+            <p class="text-[11px] text-slate-400 leading-relaxed mb-2.5 bg-slate-950/50 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
+              💡 ${ex.note}
+            </p>
+
+            <!-- Double Progression Status Banner -->
+            <div class="mb-2.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center justify-between gap-2 ${prog.color}" id="prog-${ex.id}">
+              <span>${prog.badge}</span>
+            </div>
+
+            <!-- Sets Table Header -->
+            <div class="grid grid-cols-12 gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 mb-1">
+              <div class="col-span-1 text-center">Сет</div>
+              <div class="col-span-4">Прошлый раз</div>
+              <div class="col-span-3 text-center">Вес (кг)</div>
+              <div class="col-span-2 text-center">Повт.</div>
+              <div class="col-span-2 text-center">Готово</div>
+            </div>
+
+            <!-- Sets Rows -->
+            <div class="space-y-1.5">
+        `;
+
+        for (let s = 1; s <= ex.sets; s++) {
+          const cur = getSetData(week, ex.id, s);
+          const prev = prevWeek >= 1 ? getSetData(prevWeek, ex.id, s) : { weight: '', reps: '' };
+          const hasPrev = prev.weight !== '' || prev.reps !== '';
+          const prevText = hasPrev ? `${prev.weight || 0} кг × ${prev.reps || 0}` : '—';
+
+          // Placeholder weight from previous week or from set 1 of current week
+          const set1 = getSetData(week, ex.id, 1);
+          const weightPlaceholder = prev.weight !== '' ? prev.weight : (set1.weight !== '' ? set1.weight : 'кг');
+          const repsPlaceholder = prev.reps !== '' ? prev.reps : `${range.min}-${range.max}`;
+
+          const isTopRep = cur.reps !== '' && Number(cur.reps) >= range.max;
+
+          html += `
+            <div id="row-${ex.id}-${s}" class="grid grid-cols-12 gap-1.5 items-center p-1.5 rounded-xl border border-slate-800/90 bg-slate-950/60 transition ${cur.done ? 'set-done' : ''}">
+              <!-- Set Number -->
+              <div class="col-span-1 text-center font-mono text-xs font-bold ${cur.done ? 'text-emerald-400' : 'text-slate-400'}">
+                ${s}
+              </div>
+
+              <!-- Previous Week (Tap to autofill) -->
+              <div class="col-span-4">
+                <button
+                  onclick="copyFromPrev(${week}, '${ex.id}', ${s}, '${prev.weight}', '${prev.reps}', ${ex.restSec})"
+                  title="Нажми, чтобы скопировать вес с прошлой недели"
+                  class="w-full text-left px-2 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono ${hasPrev ? 'text-slate-300 hover:border-emerald-500/40 active:scale-95' : 'text-slate-600'} truncate transition"
+                >
+                  ${prevText}
+                </button>
+              </div>
+
+              <!-- Weight Input -->
+              <div class="col-span-3">
+                <input
+                  type="number"
+                  step="0.5"
+                  inputmode="decimal"
+                  placeholder="${weightPlaceholder}"
+                  value="${cur.weight}"
+                  oninput="onSetInput(${week}, '${ex.id}', ${s}, 'weight', this.value)"
+                  class="w-full text-center font-mono text-sm font-bold bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <!-- Reps Input -->
+              <div class="col-span-2">
+                <input
+                  type="number"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="${repsPlaceholder}"
+                  value="${cur.reps}"
+                  oninput="onSetInput(${week}, '${ex.id}', ${s}, 'reps', this.value)"
+                  class="w-full text-center font-mono text-sm font-bold bg-slate-900 border ${isTopRep ? 'border-emerald-500/60 text-emerald-300' : 'border-slate-700/80 text-white'} rounded-lg py-1.5 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <!-- Complete Set & Start Rest Timer Button -->
+              <div class="col-span-2 flex justify-center">
+                <button
+                  onclick="toggleSetDone(${week}, '${ex.id}', ${s}, ${ex.restSec})"
+                  class="w-full py-1.5 rounded-lg font-bold text-xs flex items-center justify-center transition active:scale-90 ${cur.done ? 'bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30' : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'}"
+                >
+                  ✓
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        const noteKey = `w${week}_${ex.id}`;
+        const curNote = state.notes[noteKey] || '';
+
+        html += `
+            </div>
+
+            <!-- Quick Note Input -->
+            <div class="mt-2">
+              <input
+                type="text"
+                placeholder="Заметка (напр., высота сиденья, положение рукояти, легко/тяжело)..."
+                value="${curNote.replace(/"/g, '&quot;')}"
+                oninput="onNoteInput('${noteKey}', this.value)"
+                class="w-full bg-transparent border-b border-slate-800 focus:border-emerald-500/60 text-[11px] text-slate-300 placeholder-slate-600 py-1 focus:outline-none"
+              />
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      document.getElementById('mainContainer').innerHTML = html;
+    }
+
+    function onSetInput(week, exId, setIdx, field, value) {
+      setSetData(week, exId, setIdx, { [field]: value });
+      // Auto-propagate weight from set 1 to empty sets 2..N for convenience
+      if (field === 'weight' && setIdx === 1 && value !== '') {
+        const day = PROGRAM[state.currentTab];
+        const ex = day && day.exercises.find(e => e.id === exId);
+        if (ex) {
+          for (let s = 2; s <= ex.sets; s++) {
+            const other = getSetData(week, exId, s);
+            if (other.weight === '' && !other.done) {
+              // Just update placeholder visually or leave ready
+            }
+          }
+        }
+      }
+      // Refresh progression badge dynamically without losing input focus
+      const day = PROGRAM[state.currentTab];
+      if (day) {
+        const ex = day.exercises.find(e => e.id === exId);
+        if (ex) {
+          const prog = evaluateProgression(week, ex);
+          const progEl = document.getElementById(`prog-${ex.id}`);
+          if (progEl) {
+            progEl.className = `mb-2.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center justify-between gap-2 ${prog.color}`;
+            progEl.innerHTML = `<span>${prog.badge}</span>`;
+          }
+        }
+      }
+    }
+
+    function onNoteInput(noteKey, value) {
+      state.notes[noteKey] = value;
+      saveState();
+    }
+
+    function copyFromPrev(week, exId, setIdx, prevWeight, prevReps, restSec) {
+      if (!prevWeight && !prevReps) return;
+      const cur = getSetData(week, exId, setIdx);
+      setSetData(week, exId, setIdx, {
+        weight: cur.weight !== '' ? cur.weight : prevWeight,
+        reps: cur.reps !== '' ? cur.reps : prevReps
+      });
+      render();
+    }
+
+    function toggleSetDone(week, exId, setIdx, restSec) {
+      const cur = getSetData(week, exId, setIdx);
+      const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
+      const prev = prevWeek >= 1 ? getSetData(prevWeek, exId, setIdx) : { weight: '', reps: '' };
+      const set1 = getSetData(week, exId, 1);
+
+      let nextWeight = cur.weight;
+      let nextReps = cur.reps;
+
+      // If user tapped ✓ without typing weight, auto-fill from Set 1 or Previous Week
+      if (nextWeight === '') {
+        if (set1.weight !== '') nextWeight = set1.weight;
+        else if (prev.weight !== '') nextWeight = prev.weight;
+      }
+      if (nextReps === '' && prev.reps !== '') {
+        nextReps = prev.reps;
+      }
+
+      const nextDone = !cur.done;
+      setSetData(week, exId, setIdx, {
+        weight: nextWeight,
+        reps: nextReps,
+        done: nextDone
+      });
+
+      if (nextDone) {
+        setTimerPreset(restSec, true);
+      }
+      render();
+    }
+
+    // ==========================================
+    // 5. ВКЛАДКА: ВЕС ТЕЛА И ПИТАНИЕ (2900–3000 ККАЛ)
+    // ==========================================
+    function renderNutrition() {
+      const week = Number(state.currentWeek);
+      const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+      // Calculate current week average and previous week average
+      const curWeights = [];
+      const prevWeights = [];
+      for (let d = 1; d <= 7; d++) {
+        const cw = Number(state.bodyWeight[`w${week}_d${d}`]);
+        if (cw > 0) curWeights.push(cw);
+        if (week > 1) {
+          const pw = Number(state.bodyWeight[`w${week - 1}_d${d}`]);
+          if (pw > 0) prevWeights.push(pw);
+        }
+      }
+
+      const curAvg = curWeights.length ? (curWeights.reduce((a, b) => a + b, 0) / curWeights.length) : null;
+      const prevAvg = prevWeights.length ? (prevWeights.reduce((a, b) => a + b, 0) / prevWeights.length) : null;
+      const diff = (curAvg !== null && prevAvg !== null) ? (curAvg - prevAvg) : null;
+
+      let diffBadge = '<span class="text-slate-400">Вноси утренний вес натощак</span>';
+      if (diff !== null) {
+        if (diff >= 0.2 && diff <= 0.45) {
+          diffBadge = `<span class="text-emerald-400 font-bold">+${diff.toFixed(2)} кг за неделю (Идеальный Lean Bulk ✅)</span>`;
+        } else if (diff < 0.2) {
+          diffBadge = `<span class="text-amber-400 font-bold">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} кг (Мало! Добавь +250 ккал углеводами 🍚)</span>`;
+        } else {
+          diffBadge = `<span class="text-rose-400 font-bold">+${diff.toFixed(2)} кг (Слишком быстро, чуть урежь профицит)</span>`;
+        }
+      }
+
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const todayChecks = state.dailyChecklist[todayKey] || { kcal: false, protein: false, creatine: false, shake: false };
+
+      let html = `
+        <div class="space-y-3">
+          <!-- Daily Checklist Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
+            <div class="flex items-center justify-between mb-2.5">
+              <h2 class="text-sm font-bold text-white">Ежедневный чек-лист (183 см / 73 кг)</h2>
+              <span class="text-[11px] font-mono text-slate-400">${todayKey}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="toggleDailyCheck('${todayKey}', 'kcal')" class="p-2.5 rounded-xl border text-left transition ${todayChecks.kcal ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                <div class="text-xs font-bold flex items-center justify-between">
+                  <span>🔥 2900–3000 ккал</span>
+                  <span>${todayChecks.kcal ? '✅' : '⬜'}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Профицит +300–400 ккал</div>
+              </button>
+
+              <button onclick="toggleDailyCheck('${todayKey}', 'protein')" class="p-2.5 rounded-xl border text-left transition ${todayChecks.protein ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                <div class="text-xs font-bold flex items-center justify-between">
+                  <span>🥩 125–145 г белка</span>
+                  <span>${todayChecks.protein ? '✅' : '⬜'}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">3–4 приема по 35 г</div>
+              </button>
+
+              <button onclick="toggleDailyCheck('${todayKey}', 'creatine')" class="p-2.5 rounded-xl border text-left transition ${todayChecks.creatine ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                <div class="text-xs font-bold flex items-center justify-between">
+                  <span>⚡ Креатин 5 г</span>
+                  <span>${todayChecks.creatine ? '✅' : '⬜'}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Моногидрат каждый день</div>
+              </button>
+
+              <button onclick="toggleDailyCheck('${todayKey}', 'shake')" class="p-2.5 rounded-xl border text-left transition ${todayChecks.shake ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                <div class="text-xs font-bold flex items-center justify-between">
+                  <span>🥤 Коктейль 750 ккал</span>
+                  <span>${todayChecks.shake ? '✅' : '⬜'}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Молоко+банан+овсянка+паста</div>
+              </button>
+            </div>
+
+            <!-- Macros summary bar -->
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+              <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+                <div class="text-[10px] text-slate-400">Белки (1.6–2 г/кг)</div>
+                <div class="text-xs font-bold text-emerald-400 mt-0.5">120–145 г</div>
+              </div>
+              <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+                <div class="text-[10px] text-slate-400">Жиры (~1 г/кг)</div>
+                <div class="text-xs font-bold text-amber-400 mt-0.5">75–85 г</div>
+              </div>
+              <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+                <div class="text-[10px] text-slate-400">Углеводы (энергия)</div>
+                <div class="text-xs font-bold text-sky-400 mt-0.5">400–430 г</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Morning Body Weight Tracker -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
+            <div class="flex items-center justify-between mb-1">
+              <h2 class="text-sm font-bold text-white">Утренний вес натощак — Неделя ${week}</h2>
+              <span class="text-xs font-mono font-bold text-emerald-400">
+                Средний: ${curAvg !== null ? curAvg.toFixed(2) + ' кг' : '—'}
+              </span>
+            </div>
+            <p class="text-[11px] mb-3">${diffBadge}</p>
+
+            <div class="grid grid-cols-7 gap-1.5">
+              ${days.map((dName, idx) => {
+                const dIdx = idx + 1;
+                const val = state.bodyWeight[`w${week}_d${dIdx}`] || '';
+                return `
+                  <div class="text-center">
+                    <div class="text-[10px] text-slate-400 mb-1 font-medium">${dName}</div>
+                    <input
+                      type="number"
+                      step="0.1"
+                      inputmode="decimal"
+                      placeholder="73"
+                      value="${val}"
+                      oninput="onBodyWeightInput(${week}, ${dIdx}, this.value)"
+                      class="w-full text-center font-mono text-xs font-bold bg-slate-950 border border-slate-800 rounded-lg py-2 text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">
+              📌 <b>Правило контроля:</b> Цель — <b>+0.25–0.4 кг в неделю</b> (1–1.5 кг в месяц). Если за 2 недели средний вес не вырос — добавь <b>+250 ккал</b> за счет углеводов.
+            </p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('mainContainer').innerHTML = html;
+    }
+
+    function toggleDailyCheck(dateKey, field) {
+      const cur = state.dailyChecklist[dateKey] || { kcal: false, protein: false, creatine: false, shake: false };
+      cur[field] = !cur[field];
+      state.dailyChecklist[dateKey] = cur;
+      saveState();
+      render();
+    }
+
+    function onBodyWeightInput(week, dayIdx, val) {
+      state.bodyWeight[`w${week}_d${dayIdx}`] = val;
+      saveState();
+    }
+
+    // ==========================================
+    // 6. ВКЛАДКА: СВОДКА И ПРОГРЕСС ПО НЕДЕЛЯМ
+    // ==========================================
+    function renderStats() {
+      let html = `
+        <div class="space-y-3">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
+            <h2 class="text-sm font-bold text-white mb-1">Сводная таблица рабочих весов (Недели 1–8)</h2>
+            <p class="text-xs text-slate-400 mb-3">Лучший подход (Вес × Повторы) в каждом упражнении по неделям:</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-[11px]">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400">
+                    <th class="py-1.5 pr-2">Упражнение</th>
+                    ${[1,2,3,4,5,6,7,8].map(w => `<th class="py-1.5 px-1.5 text-center font-mono">Н${w}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+      `;
+
+      Object.values(PROGRAM).forEach(day => {
+        html += `
+          <tr class="bg-slate-950/60">
+            <td colspan="9" class="py-1.5 px-2 font-bold text-emerald-400 text-[11px]">${day.title}</td>
+          </tr>
+        `;
+        day.exercises.forEach(ex => {
+          html += `<tr><td class="py-1.5 pr-2 text-slate-200 font-medium max-w-[140px] truncate">${ex.name}</td>`;
+          for (let w = 1; w <= 8; w++) {
+            let best = '—';
+            let bestScore = -1;
+            for (let s = 1; s <= ex.sets; s++) {
+              const d = getSetData(w, ex.id, s);
+              if (d.weight !== '' || d.reps !== '') {
+                const score = (Number(d.weight) || 1) * (Number(d.reps) || 0);
+                if (score > bestScore) {
+                  bestScore = score;
+                  best = `${d.weight || 0}×${d.reps || 0}`;
+                }
+              }
+            }
+            html += `<td class="py-1.5 px-1 text-center font-mono ${best !== '—' ? 'text-white font-semibold' : 'text-slate-600'}">${best}</td>`;
+          }
+          html += `</tr>`;
+        });
+      });
+
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('mainContainer').innerHTML = html;
+    }
+
+    function render() {
+      renderTabs();
+      if (state.currentTab === 'nutrition') {
+        renderNutrition();
+      } else if (state.currentTab === 'stats') {
+        renderStats();
+      } else {
+        renderWorkoutDay(state.currentTab);
+      }
+      updateHeaderWeight();
+    }
+
+    // ==========================================
+    // 7. ТАЙМЕР ОТДЫХА СО ЗВУКОМ
+    // ==========================================
+    let timerTotal = 150;
+    let timerRemaining = 150;
+    let timerInterval = null;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+      const disp = document.getElementById('timerDisplay');
+      const bar = document.getElementById('timerProgressBar');
+      const lbl = document.getElementById('timerStatusLabel');
+      if (disp) disp.textContent = formatTime(timerRemaining);
+      if (bar) {
+        const pct = timerTotal > 0 ? Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100)) : 0;
+        bar.style.width = `${pct}%`;
+      }
+      if (lbl) {
+        lbl.textContent = timerInterval ? 'Идет отдых...' : (timerRemaining === 0 ? '🔥 ВРЕМЯ ПОДХОДА!' : 'Таймер отдыха');
+        lbl.className = timerRemaining === 0 ? 'text-[11px] font-bold text-emerald-400 animate-pulse' : 'text-[11px] text-slate-400';
+      }
+    }
+
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.2, 0.4].forEach(delay => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.25, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.15);
+        });
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      } catch (e) {}
+    }
+
+    function setTimerPreset(seconds, autoStart = true) {
+      timerTotal = seconds;
+      timerRemaining = seconds;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      if (autoStart) {
+        startTimer();
+      } else {
+        updateTimerUI();
+      }
+    }
+
+    function adjustTimer(delta) {
+      timerRemaining = Math.max(0, timerRemaining + delta);
+      timerTotal = Math.max(timerTotal, timerRemaining);
+      updateTimerUI();
+    }
+
+    function startTimer() {
+      if (timerRemaining <= 0) timerRemaining = timerTotal;
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        if (timerRemaining <= 0) {
+          timerRemaining = 0;
+          clearInterval(timerInterval);
+          timerInterval = null;
+          playBeep();
+        }
+        updateTimerUI();
+      }, 1000);
+      updateTimerUI();
+    }
+
+    function toggleTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        updateTimerUI();
+      } else {
+        startTimer();
+      }
+    }
+
+    // ==========================================
+    // 8. ЭКСПОРТ CSV / JSON БЭКАП
+    // ==========================================
+    function openDataModal() {
+      document.getElementById('dataModal').classList.remove('hidden');
+    }
+
+    function closeDataModal() {
+      document.getElementById('dataModal').classList.add('hidden');
+    }
+
+    function exportCSV() {
+      const rows = [['Неделя', 'День', 'Упражнение', 'Подход', 'Вес (кг)', 'Повторы', 'Выполнено', 'Заметка']];
+      for (let w = 1; w <= 16; w++) {
+        Object.values(PROGRAM).forEach(day => {
+          day.exercises.forEach(ex => {
+            const note = state.notes[`w${w}_${ex.id}`] || '';
+            for (let s = 1; s <= ex.sets; s++) {
+              const d = getSetData(w, ex.id, s);
+              if (d.weight !== '' || d.reps !== '' || note !== '') {
+                rows.push([
+                  w,
+                  day.title,
+                  ex.name,
+                  s,
+                  d.weight,
+                  d.reps,
+                  d.done ? 'Да' : 'Нет',
+                  note
+                ]);
+              }
+            }
+          });
+        });
+      }
+      const csvContent = '\uFEFF' + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GYM738_Workouts_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GYM738_Backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          state = Object.assign(getDefaultState(), parsed);
+          saveState();
+          initWeekSelect();
+          render();
+          closeDataModal();
+        } catch (err) {
+          alert('Ошибка чтения файла бэкапа');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllData() {
+      if (confirm('Точно очистить все записанные веса и повторы?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        openIDB().then(db => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).delete(STORAGE_KEY);
+        }).catch(() => {});
+        state = getDefaultState();
+        initWeekSelect();
+        render();
+        closeDataModal();
+      }
+    }
+
+    // Boot
+    initWeekSelect();
+    render();
+    updateTimerUI();
+    restoreFromIDBIfNeeded();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
