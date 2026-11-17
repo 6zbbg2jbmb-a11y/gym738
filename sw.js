@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'gym738-cache-';
-const CACHE_NAME = `${CACHE_PREFIX}v8`;
+const CACHE_NAME = `${CACHE_PREFIX}v9`;
 const ASSETS = [
   './',
   './index.html',
@@ -45,7 +45,8 @@ self.addEventListener('fetch', event => {
   url.search = '';
   const isAsset = ASSET_URLS.has(url.href);
   const isNavigation = request.mode === 'navigate';
-  if (!isAsset && !isNavigation) return;
+  // Nested diaries have their own worker and must never receive this app shell.
+  if (!isAsset) return;
 
   event.respondWith((async () => {
     try {

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GYM738 Друг" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="description" content="Твои тренировки, рабочие веса и прогресс. Простой дневник для зала." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="views.css" />
+  <title>GYM738 — Дневник друга</title>
+  <script src="views.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="app-header" id="appHeader">
+    <div class="shell">
+      <div class="topline">
+        <div class="brand">
+          <h1>GYM738</h1>
+          <span id="saveStatusBadge" class="save-status" role="status">На этом устройстве</span>
+        </div>
+        <div class="week-picker">
+          <label class="sr-only" for="weekSelect">Неделя тренировок</label>
+          <select id="weekSelect" onchange="changeWeek(this.value)"></select>
+        </div>
+        <button type="button" class="icon-button" onclick="openDataModal()" aria-label="Сохранение и настройки">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 8v.01M12 12v.01M12 16v.01" stroke-linecap="round" stroke-width="3"/><rect x="4" y="3" width="16" height="18" rx="5"/></svg>
+        </button>
+      </div>
+      <nav class="primary-nav" aria-label="Разделы приложения">
+        <button type="button" id="nav-workout" onclick="selectTab(lastWorkoutTab)">Тренировка</button>
+        <button type="button" id="nav-nutrition" onclick="selectTab('nutrition')">Питание</button>
+        <button type="button" id="nav-stats" onclick="selectTab('stats')">Прогресс</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell" id="mainContainer"></main>
+
+  <aside class="timer-dock" id="bottomTimerBar" aria-label="Таймер отдыха">
+    <div class="shell">
+      <div class="timer-main">
+        <button type="button" class="timer-toggle" id="timerToggleBtn" onclick="toggleTimer()" aria-label="Запустить таймер">
+          <svg id="timerPlayIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 5l11 7-11 7z"/></svg>
+        </button>
+        <div class="timer-readout">
+          <time id="timerDisplay" aria-label="Осталось времени">02:30</time>
+          <p id="timerStatusLabel">Отдых</p>
+        </div>
+        <button type="button" class="timer-add" onclick="adjustTimer(30)" aria-label="Добавить 30 секунд">+30 с</button>
+        <button type="button" id="timerOptionsButton" class="icon-button" onclick="toggleTimerOptions()" aria-label="Выбрать время отдыха" aria-expanded="false" aria-controls="timerOptions">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+        </button>
+      </div>
+      <div id="timerOptions" class="timer-settings" hidden>
+        <button type="button" onclick="chooseTimerPreset(90)" data-seconds="90">1:30</button>
+        <button type="button" onclick="chooseTimerPreset(120)" data-seconds="120">2:00</button>
+        <button type="button" onclick="chooseTimerPreset(150)" data-seconds="150">2:30</button>
+        <button type="button" onclick="chooseTimerPreset(180)" data-seconds="180">3:00</button>
+      </div>
+      <div class="timer-progress" aria-hidden="true"><span id="timerProgressBar"></span></div>
+    </div>
+  </aside>
+
+  <div id="kbDismissBar" class="keyboard-toolbar" hidden>
+    <div class="shell"><button type="button" onpointerdown="dismissKeyboard(event)" onclick="dismissKeyboard(event)">Готово</button></div>
+  </div>
+
+  <dialog id="dataModal" aria-labelledby="dataModalTitle">
+    <div class="dialog-heading">
+      <h2 id="dataModalTitle">Твои данные</h2>
+      <button type="button" class="icon-button" onclick="closeDataModal()" aria-label="Закрыть настройки">✕</button>
+    </div>
+    <p class="dialog-copy">Записи хранятся на этом устройстве и доступны офлайн. Сохраняй копию для переноса дневника или восстановления после очистки браузера.</p>
+    <div class="dialog-actions">
+      <button type="button" onclick="exportJSON()">Сохранить резервную копию</button>
+      <button type="button" onclick="document.getElementById('importFile').click()">Восстановить из копии</button>
+      <input type="file" id="importFile" accept=".json,application/json" onchange="importJSON(event)" hidden aria-label="Файл резервной копии" />
+      <button type="button" onclick="exportCSV()">Экспортировать в Excel · CSV</button>
+      <button type="button" onclick="forceAppUpdate()">Проверить обновление</button>
+      <button type="button" class="danger" onclick="resetAllData()">Удалить все записи</button>
+    </div>
+  </dialog>
+</body>
+</html>
