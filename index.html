@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
-  <title>GYM738 — Дневник тренировок (Upper / Lower)</title>
+  <title>GYM738 — Дневник тренировок</title>
   <script src="tailwind.js"></script>
   <style>
     :root {
@@ -19,53 +19,49 @@
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
     html, body {
       background-color: #090d16;
       color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       overscroll-behavior-y: none;
+      margin: 0;
+      padding: 0;
     }
     body {
-      /* Запас снизу под плавающий таймер + полоску Home Indicator на iPhone 14 */
-      padding-bottom: calc(7.5rem + max(var(--safe-bottom), 20px));
+      padding-bottom: calc(8.5rem + max(var(--safe-bottom), 24px));
     }
 
-    /* Шапка с учетом «брови» / Dynamic Island на iPhone 14 (47px–59px) */
+    /* Учет брови / Dynamic Island iPhone 14 (47–59px) */
     .ios-header {
-      padding-top: max(calc(var(--safe-top) + 8px), 14px);
+      padding-top: max(calc(var(--safe-top) + 6px), 14px);
     }
     @media all and (display-mode: standalone) {
       .ios-header {
-        /* Гарантированный отступ под бровь iPhone 14 даже если env() при холодном старте = 0 */
-        padding-top: max(calc(var(--safe-top) + 8px), 52px);
+        padding-top: max(calc(var(--safe-top) + 8px), 54px);
       }
     }
 
-    /* Нижний бар таймера с учетом полоски Home Indicator на iPhone 14 */
+    /* Учет нижней полоски Home Indicator на iPhone 14 */
     .ios-bottom-bar {
-      padding-bottom: max(calc(var(--safe-bottom) + 6px), 14px);
+      padding-bottom: max(calc(var(--safe-bottom) + 6px), 12px);
     }
     @media all and (display-mode: standalone) {
       .ios-bottom-bar {
-        padding-bottom: max(calc(var(--safe-bottom) + 4px), 28px);
+        padding-bottom: max(calc(var(--safe-bottom) + 4px), 26px);
       }
     }
 
-    /* Важно для iOS: шрифт 16px в полях ввода отключает авто-зум экрана при нажатии на Айфоне */
+    /* Отключаем авто-зум Safari при фокусе на поле ввода (обязательно >= 16px) */
     input, select, textarea {
       font-size: 16px !important;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -73,36 +69,54 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
     .set-done {
-      background: linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.05) 100%);
-      border-color: rgba(16, 185, 129, 0.4) !important;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+      border-color: rgba(16, 185, 129, 0.45) !important;
+    }
+
+    /* Плавное нажатие в стиле iOS */
+    .ios-btn:active {
+      transform: scale(0.94);
+      opacity: 0.85;
     }
   </style>
 </head>
 <body class="min-h-screen selection:bg-emerald-500 selection:text-slate-950">
 
-  <!-- Top Sticky Header (адаптирован под бровь iPhone 14) -->
+  <!-- Плавающая кнопка закрытия клавиатуры на iPhone (появляется только когда открыта клавиатура) -->
+  <div id="kbDismissBar" class="fixed top-0 inset-x-0 z-50 hidden pointer-events-none flex justify-end px-3" style="padding-top: max(calc(env(safe-area-inset-top, 47px) + 6px), 52px);">
+    <button type="button" onmousedown="dismissKeyboard(event)" ontouchstart="dismissKeyboard(event)" class="pointer-events-auto px-3.5 py-1.5 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-xl shadow-black/60 flex items-center gap-1.5 active:scale-95">
+      <span>Готово</span>
+      <span>⌨️↓</span>
+    </button>
+  </div>
+
+  <!-- Top Sticky Header (iPhone 14 Safe Area) -->
   <header class="ios-header sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-xl border-b border-slate-800/80 px-3.5 pb-2.5">
     <div class="max-w-lg mx-auto">
       <div class="flex items-center justify-between gap-2 mb-2.5">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-extrabold text-sm shadow-inner">
+          <div class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-extrabold text-sm">
             UL
           </div>
           <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <h1 class="text-[15px] font-bold tracking-tight text-white leading-none">GYM738</h1>
-              <span id="saveStatusBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400">✓ В памяти</span>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-[15px] font-extrabold tracking-tight text-white leading-none">GYM738</h1>
+              <span id="saveStatusBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400">✓ Сохранено</span>
             </div>
             <p class="text-[11px] text-slate-400 mt-0.5 truncate">183 см • <span id="headerCurrentWeight">73.0</span> кг • Двойная прогрессия</p>
           </div>
         </div>
 
-        <!-- Week selector + Backup menu -->
+        <!-- Выбор недели и меню бэкапа -->
         <div class="flex items-center gap-1.5 shrink-0">
-          <select id="weekSelect" onchange="changeWeek(this.value)" class="bg-slate-800/95 text-white font-semibold rounded-xl px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500 h-9">
-          </select>
-          <button onclick="openDataModal()" title="Бэкап и таблица" class="w-9 h-9 rounded-xl bg-slate-800/95 border border-slate-700 text-slate-300 hover:text-white active:scale-95 transition flex items-center justify-center">
+          <div class="relative">
+            <select id="weekSelect" onchange="changeWeek(this.value)" class="bg-slate-800/95 text-white font-bold rounded-xl pl-2.5 pr-6 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500 h-9">
+            </select>
+            <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">▼</span>
+          </div>
+          <button onclick="openDataModal()" title="Бэкап и настройки" class="ios-btn w-9 h-9 rounded-xl bg-slate-800/95 border border-slate-700 text-slate-300 flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
@@ -110,47 +124,47 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (крупные кнопки под большой палец на iPhone 14) -->
-      <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1" id="dayTabs">
-        <button onclick="selectTab('upperA')" id="tab-upperA" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          Пн: Верх А
+      <!-- Дни тренировок (крупные кнопки под палец) -->
+      <div class="grid grid-cols-6 gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800/90" id="dayTabs">
+        <button onclick="selectTab('upperA')" id="tab-upperA" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          Верх А
         </button>
-        <button onclick="selectTab('lowerA')" id="tab-lowerA" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          Вт: Низ А
+        <button onclick="selectTab('lowerA')" id="tab-lowerA" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          Низ А
         </button>
-        <button onclick="selectTab('upperB')" id="tab-upperB" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          Чт: Верх Б
+        <button onclick="selectTab('upperB')" id="tab-upperB" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          Верх Б
         </button>
-        <button onclick="selectTab('lowerB')" id="tab-lowerB" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          Пт: Низ Б
+        <button onclick="selectTab('lowerB')" id="tab-lowerB" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          Низ Б
         </button>
-        <button onclick="selectTab('nutrition')" id="tab-nutrition" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          ⚖️ Вес и КБЖУ
+        <button onclick="selectTab('nutrition')" id="tab-nutrition" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          ⚖️ КБЖУ
         </button>
-        <button onclick="selectTab('stats')" id="tab-stats" class="tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          📈 Сводка
+        <button onclick="selectTab('stats')" id="tab-stats" class="ios-btn py-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+          📈 Итог
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
-  <main class="max-w-lg mx-auto px-3.5 pt-3" id="mainContainer">
+  <!-- Основной контент -->
+  <main class="max-w-lg mx-auto px-3 pt-3" id="mainContainer">
   </main>
 
-  <!-- Floating Bottom Rest Timer Bar (с учетом полоски Home на iPhone 14) -->
-  <div class="ios-bottom-bar fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 px-3.5 pt-2.5 shadow-2xl">
+  <!-- Нижний бар таймера отдыха (адаптирован под большой палец и полоску Home на iPhone 14) -->
+  <div id="bottomTimerBar" class="ios-bottom-bar fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 px-3.5 pt-2.5 shadow-2xl transition-colors duration-300">
     <div class="max-w-lg mx-auto flex items-center justify-between gap-2">
       <div class="flex items-center gap-2.5">
-        <button id="timerToggleBtn" onclick="toggleTimer()" class="w-11 h-11 rounded-2xl bg-emerald-500 text-slate-950 font-bold flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-90 transition">
+        <button id="timerToggleBtn" onclick="toggleTimer()" class="ios-btn w-11 h-11 rounded-2xl bg-emerald-500 text-slate-950 font-extrabold flex items-center justify-center shadow-lg shadow-emerald-500/20">
           <svg id="timerPlayIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
           </svg>
         </button>
-        <div>
+        <div onclick="toggleTimer()" class="cursor-pointer">
           <div class="flex items-baseline gap-1.5">
             <span id="timerDisplay" class="font-mono text-xl font-extrabold text-white tabular-nums tracking-tight">02:30</span>
-            <span id="timerStatusLabel" class="text-[11px] text-slate-400">Отдых</span>
+            <span id="timerStatusLabel" class="text-[11px] font-medium text-slate-400">Отдых</span>
           </div>
           <div class="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-0.5">
             <div id="timerProgressBar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 100%"></div>
@@ -158,42 +172,42 @@
         </div>
       </div>
 
-      <!-- Quick preset buttons + Dismiss Keyboard button -->
+      <!-- Быстрый выбор времени отдыха -->
       <div class="flex items-center gap-1">
-        <button onclick="setTimerPreset(90)" class="px-2 py-2 rounded-xl bg-slate-800 active:bg-slate-700 text-[11px] font-semibold text-slate-300 active:scale-95">1:30</button>
-        <button onclick="setTimerPreset(120)" class="px-2 py-2 rounded-xl bg-slate-800 active:bg-slate-700 text-[11px] font-semibold text-slate-300 active:scale-95">2:00</button>
-        <button onclick="setTimerPreset(150)" class="px-2 py-2 rounded-xl bg-slate-800 active:bg-slate-700 text-[11px] font-semibold text-slate-300 active:scale-95">2:30</button>
-        <button onclick="setTimerPreset(180)" class="px-2 py-2 rounded-xl bg-slate-800 active:bg-slate-700 text-[11px] font-semibold text-slate-300 active:scale-95">3:00</button>
-        <button onclick="adjustTimer(30)" class="px-2 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold text-emerald-400 active:scale-95">+30с</button>
+        <button onclick="setTimerPreset(90)" class="ios-btn px-2.5 py-2 rounded-xl bg-slate-800 text-[11px] font-bold text-slate-300">1:30</button>
+        <button onclick="setTimerPreset(120)" class="ios-btn px-2.5 py-2 rounded-xl bg-slate-800 text-[11px] font-bold text-slate-300">2:00</button>
+        <button onclick="setTimerPreset(150)" class="ios-btn px-2.5 py-2 rounded-xl bg-slate-800 text-[11px] font-bold text-slate-300">2:30</button>
+        <button onclick="setTimerPreset(180)" class="ios-btn px-2.5 py-2 rounded-xl bg-slate-800 text-[11px] font-bold text-slate-300">3:00</button>
+        <button onclick="adjustTimer(30)" class="ios-btn px-2 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-extrabold text-emerald-400">+30с</button>
       </div>
     </div>
   </div>
 
-  <!-- Data / Backup / Export Modal -->
+  <!-- Модальное окно бэкапа -->
   <div id="dataModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-5 space-y-3.5 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white">Сохранение и резервная копия</h3>
-        <button onclick="closeDataModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+        <h3 class="text-base font-bold text-white">Сохранение и данные</h3>
+        <button onclick="closeDataModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">✕</button>
       </div>
       <p class="text-xs text-slate-400 leading-relaxed">
-        Все твои веса и повторы автоматически сохраняются в двойную память Айфона (<code class="text-emerald-400">localStorage + IndexedDB</code>). При обновлениях приложения данные <b>не стираются</b>.
+        Твои записи мгновенно сохраняются в память Айфона (<code class="text-emerald-400">localStorage + IndexedDB</code>). Даже без интернета и при обновлениях дизайна они <b>не стираются</b>.
       </p>
       <div class="grid grid-cols-1 gap-2.5">
-        <button onclick="exportCSV()" class="w-full py-3 px-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold active:scale-98 transition flex items-center justify-center gap-2">
-          📊 Скачать таблицу тренировок (.CSV для Excel)
+        <button onclick="exportCSV()" class="ios-btn w-full py-3 px-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2">
+          📊 Выгрузить таблицу (.CSV для Excel)
         </button>
-        <button onclick="exportJSON()" class="w-full py-3 px-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold active:scale-98 transition flex items-center justify-center gap-2">
-          💾 Сохранить файл бэкапа (.JSON) на Айфон
+        <button onclick="exportJSON()" class="ios-btn w-full py-3 px-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2">
+          💾 Сохранить бэкап (.JSON) на Айфон
         </button>
-        <label class="w-full py-3 px-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer">
-          📂 Восстановить из бэкапа (.JSON)
+        <label class="ios-btn w-full py-3 px-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer">
+          📂 Загрузить бэкап (.JSON)
           <input type="file" accept=".json" onchange="importJSON(event)" class="hidden" />
         </label>
-        <button onclick="forceAppUpdate()" class="w-full py-2.5 px-4 rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-semibold active:scale-98 transition flex items-center justify-center gap-2">
-          🔄 Обновить дизайн (все записи сохранятся)
+        <button onclick="forceAppUpdate()" class="ios-btn w-full py-2.5 px-4 rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-semibold flex items-center justify-center gap-2">
+          🔄 Обновить версию (записи сохранятся)
         </button>
-        <button onclick="resetAllData()" class="w-full py-2.5 px-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium active:scale-98 transition mt-1">
+        <button onclick="resetAllData()" class="ios-btn w-full py-2.5 px-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium mt-1">
           Очистить все записи
         </button>
       </div>
@@ -207,9 +221,9 @@
     const PROGRAM = {
       upperA: {
         id: 'upperA',
-        title: 'День 1: Верх А (Пн)',
-        subtitle: 'Акцент на базовую силу и толщину верха',
-        warmupNote: 'Перед первым упражнением на группу мышц сделай 2–3 разминочных подхода с постепенным ростом веса без утомления.',
+        title: 'Пн • Верх А (Базовая сила)',
+        subtitle: 'Толщина спины, жимовая база и длинные головки рук',
+        warmupNote: 'Разминка: 2–3 подхода перед первым упражнением на мышцу без утомления.',
         exercises: [
           {
             id: 'ua_bench',
@@ -220,12 +234,13 @@
             rir: 'RIR 2',
             restSec: 180,
             restLabel: '3 мин',
-            muscle: 'Грудь / Трицепс',
+            muscle: 'Грудь',
+            step: 2.5,
             note: 'Главный драйвер силового прогресса жимовой группы. Оставляй 2 повторения в запасе.'
           },
           {
             id: 'ua_row',
-            name: 'Тяга штанги или Т-грифа в наклоне (с упором грудью)',
+            name: 'Тяга штанги / Т-грифа в наклоне (с упором)',
             variants: ['Тяга Т-грифа с упором грудью', 'Тяга штанги в наклоне'],
             sets: 3,
             minReps: 6,
@@ -233,7 +248,8 @@
             rir: 'RIR 1–2',
             restSec: 150,
             restLabel: '2.5 мин',
-            muscle: 'Спина (толщина)',
+            muscle: 'Спина',
+            step: 2.5,
             note: 'Упор грудью снимает читинг поясницей и направляет 100% нагрузки в верх спины и широчайшие.'
           },
           {
@@ -245,13 +261,14 @@
             rir: 'RIR 1–2',
             restSec: 150,
             restLabel: '2.5 мин',
-            muscle: 'Дельты',
+            muscle: 'Плечи',
+            step: 2,
             note: 'Глубокое опускание гантелей дает максимальное растяжение передней и средней дельты.'
           },
           {
             id: 'ua_lat_pulldown',
             name: 'Тяга верхнего блока к груди',
-            variants: ['Тяга верхнего блока широким хватом', 'Тяга верхнего блока средним хватом'],
+            variants: ['Широкий хват к груди', 'Средний хват к груди'],
             sets: 3,
             minReps: 8,
             maxReps: 12,
@@ -259,53 +276,57 @@
             restSec: 120,
             restLabel: '2 мин',
             muscle: 'Широчайшие',
+            step: 2.5,
             note: 'В верхней точке позволяй лопаткам тянуться вверх за рукоятью для растяжения широчайших.'
           },
           {
             id: 'ua_incline_curl',
-            name: 'Сгибания рук сидя на наклонной (45–60°) / блок за спиной',
-            variants: ['Сгибания с гантелями на наклонной 45–60°', 'Сгибания с нижнего блока стоя спиной'],
+            name: 'Сгибания на бицепс на наклонной (45–60°)',
+            variants: ['Гантели на наклонной 45–60°', 'Нижний блок стоя спиной'],
             sets: 3,
             minReps: 8,
             maxReps: 12,
             rir: 'RIR 0–1',
             restSec: 90,
             restLabel: '1.5 мин',
-            muscle: 'Бицепс (длинная головка)',
-            note: 'Отведение локтя за корпус максимально натягивает длинную головку бицепса. Последний подход можно в отказ.'
+            muscle: 'Бицепс',
+            step: 1,
+            note: 'Отведение локтя за корпус максимально натягивает длинную головку бицепса.'
           },
           {
             id: 'ua_overhead_ext',
-            name: 'Разгибания рук на блоке с канатом из-за головы',
+            name: 'Разгибания на трицепс с канатом из-за головы',
             sets: 3,
             minReps: 10,
             maxReps: 12,
             rir: 'RIR 0–1',
             restSec: 90,
             restLabel: '1.5 мин',
-            muscle: 'Трицепс (длинная головка)',
+            muscle: 'Трицепс',
+            step: 2.5,
             note: 'Прямой прицел в длинную головку трицепса в растянутой позиции (в 1.5 раза больше роста, чем жим книзу).'
           }
         ]
       },
       lowerA: {
         id: 'lowerA',
-        title: 'День 2: Низ А (Вт)',
-        subtitle: 'Акцент на квадрицепс и базовую силу ног',
-        warmupNote: 'Тщательно разомни тазобедренные и коленные суставы + 2–3 разминочных подхода в приседе.',
+        title: 'Вт • Низ А (Квадрицепс и база)',
+        subtitle: 'Глубокий присед, румынская тяга и бицепс бедра сидя',
+        warmupNote: 'Разомни колени и таз + 2–3 разминочных подхода в приседаниях.',
         exercises: [
           {
             id: 'la_squat',
-            name: 'Приседания со штангой (или глубокий Гакк-присед)',
-            variants: ['Приседания со штангой на спине', 'Глубокие Гакк-приседания'],
+            name: 'Приседания со штангой (или Гакк-присед)',
+            variants: ['Приседания со штангой', 'Глубокий Гакк-присед'],
             sets: 3,
             minReps: 5,
             maxReps: 8,
             rir: 'RIR 2',
             restSec: 210,
-            restLabel: '3–4 мин',
-            muscle: 'Квадрицепс / Ягодицы',
-            note: 'Опускайся максимально глубоко (ниже параллели, пока сохраняется нейтральная спина) — внизу главный стимул.'
+            restLabel: '3.5 мин',
+            muscle: 'Квадрицепс',
+            step: 2.5,
+            note: 'Опускайся максимально глубоко (ниже параллели, пока сохраняется ровная спина) — внизу главный стимул.'
           },
           {
             id: 'la_rdl',
@@ -316,12 +337,13 @@
             rir: 'RIR 2',
             restSec: 180,
             restLabel: '3 мин',
-            muscle: 'Бицепс бедра / Ягодицы',
-            note: 'Движение строго за счет отведения таза назад, штанга скользит по ногам до середины голени. Жесткое натяжение.'
+            muscle: 'Бицепс бедра',
+            step: 2.5,
+            note: 'Движение строго за счет отведения таза назад, штанга скользит по ногам до середины голени.'
           },
           {
             id: 'la_leg_press',
-            name: 'Жим ногами в тренажере (стопы внизу платформы)',
+            name: 'Жим ногами (стопы внизу платформы)',
             sets: 3,
             minReps: 10,
             maxReps: 12,
@@ -329,7 +351,8 @@
             restSec: 150,
             restLabel: '2.5 мин',
             muscle: 'Квадрицепс',
-            note: 'Узкая или средняя постановка ног в нижней части платформы для максимального сгибание колена.'
+            step: 5,
+            note: 'Узкая или средняя постановка ног в нижней части платформы для максимального сгибания колена.'
           },
           {
             id: 'la_seated_curl',
@@ -341,11 +364,12 @@
             restSec: 120,
             restLabel: '2 мин',
             muscle: 'Бицепс бедра',
-            note: 'Сидячий вариант натягивает бицепс бедра через тазобедренный сустав и дает на 30–40% больше роста, чем лежа.'
+            step: 2.5,
+            note: 'Сидячий вариант натягивает бицепс бедра через таз и дает на 30–40% больше роста, чем лежа.'
           },
           {
             id: 'la_calf_standing',
-            name: 'Подъемы на носки стоя (в тренажере или Смите)',
+            name: 'Подъемы на носки стоя (тренажер / Смит)',
             sets: 4,
             minReps: 10,
             maxReps: 15,
@@ -353,12 +377,13 @@
             restSec: 90,
             restLabel: '1.5 мин',
             muscle: 'Икры',
-            note: 'Главный секрет икр: пауза 2 секунды в нижней точке в полном растяжении (убирает рефлекс ахилла).'
+            step: 2.5,
+            note: 'Главный секрет икр: пауза 2 секунды в нижней точке в полном растяжении.'
           },
           {
             id: 'la_abs',
-            name: 'Скручивания на блоке («Молитва») / Подъемы ног в висе',
-            variants: ['Скручивания на верхнем блоке («Молитва»)', 'Подъемы ног в висе'],
+            name: 'Скручивания «Молитва» / Подъемы ног в висе',
+            variants: ['Скручивания на блоке («Молитва»)', 'Подъемы ног в висе'],
             sets: 3,
             minReps: 10,
             maxReps: 15,
@@ -366,19 +391,20 @@
             restSec: 90,
             restLabel: '1.5 мин',
             muscle: 'Пресс',
-            note: 'Контролируемое округление позвоночника под нагрузкой, без рывков бедрами.'
+            step: 2.5,
+            note: 'Контролируемое округление позвоночника под нагрузкой.'
           }
         ]
       },
       upperB: {
         id: 'upperB',
-        title: 'День 3: Верх Б (Чт)',
-        subtitle: 'Гипертрофия, верх груди и ширина плеч',
-        warmupNote: '2–3 разминочных подхода перед жимом и подтягиваниями. Фокус на глубоком растяжении в нижней точке.',
+        title: 'Чт • Верх Б (Гипертрофия)',
+        subtitle: 'Верх груди, ширина спины и средняя дельта в растяжении',
+        warmupNote: '2–3 разминочных подхода перед жимом и подтягиваниями.',
         exercises: [
           {
             id: 'ub_incline_db',
-            name: 'Жим гантелей на наклонной скамье (угол 30°)',
+            name: 'Жим гантелей на наклонной скамье (30°)',
             sets: 3,
             minReps: 8,
             maxReps: 10,
@@ -386,32 +412,35 @@
             restSec: 165,
             restLabel: '2.5–3 мин',
             muscle: 'Верх груди',
-            note: 'Угол строго 30° оптимален для ключичного пучка груди без перегрузки передней дельты. Опускай гантели глубоко.'
+            step: 2,
+            note: 'Угол строго 30° оптимален для верха груди без перегрузки передней дельты. Опускай гантели глубоко.'
           },
           {
             id: 'ub_pullups',
-            name: 'Подтягивания (с доп. весом или своим весом)',
+            name: 'Подтягивания (с доп. весом или своим)',
             sets: 3,
             minReps: 6,
             maxReps: 10,
             rir: 'RIR 1–2',
             restSec: 165,
             restLabel: '2.5–3 мин',
-            muscle: 'Широчайшие / Плечелучевая',
-            note: 'Если делаешь со своим весом — пиши 0 кг (или свой вес 73 кг) и фиксируй повторения.'
+            muscle: 'Широчайшие',
+            step: 2.5,
+            note: 'Если со своим весом — ставь 0 кг (или 73 кг) и прибавляй повторения.'
           },
           {
             id: 'ub_dips_hammer',
-            name: 'Отжимания на брусьях с весом / Жим в Хаммере',
-            variants: ['Отжимания на брусьях с весом (наклон вперед)', 'Жим от груди в Хаммере'],
+            name: 'Отжимания на брусьях с весом / Хаммер',
+            variants: ['Брусья с весом (наклон вперед)', 'Жим в тренажере Хаммер'],
             sets: 3,
             minReps: 8,
             maxReps: 12,
             rir: 'RIR 1',
             restSec: 120,
             restLabel: '2 мин',
-            muscle: 'Низ/середина груди и трицепс',
-            note: 'На брусьях наклоняй корпус вперед и уходи в комфортное глубокое растяжение.'
+            muscle: 'Грудь / Трицепс',
+            step: 2.5,
+            note: 'На брусьях наклоняй корпус вперед и уходи в глубокое растяжение.'
           },
           {
             id: 'ub_cable_row',
@@ -422,12 +451,13 @@
             rir: 'RIR 1',
             restSec: 120,
             restLabel: '2 мин',
-            muscle: 'Середина спины / Трапеции',
-            note: 'На негативной фазе подавай плечи слегка вперед, растягивая ромбовидные и трапециевидные мышцы.'
+            muscle: 'Середина спины',
+            step: 2.5,
+            note: 'На негативной фазе подавай плечи слегка вперед, растягивая трапеции и ромбовидные.'
           },
           {
             id: 'ub_cable_lateral',
-            name: 'Отведения (махи) руки в сторону на нижнем блоке',
+            name: 'Махи рукой в сторону на нижнем блоке',
             sets: 4,
             minReps: 12,
             maxReps: 15,
@@ -435,32 +465,34 @@
             restSec: 90,
             restLabel: '1.5 мин',
             muscle: 'Средняя дельта',
-            note: 'Кабель на уровне кисти или бедра дает пиковую нагрузку на среднюю дельту именно в нижней растянутой точке.'
+            step: 1.25,
+            note: 'Кабель на уровне кисти или бедра дает пиковую нагрузку на среднюю дельту в нижней растянутой точке.'
           },
           {
             id: 'ub_preacher_curl',
-            name: 'Сгибания рук с EZ-штангой на скамье Скотта',
+            name: 'Сгибания с EZ-штангой на скамье Скотта',
             sets: 3,
             minReps: 8,
             maxReps: 12,
             rir: 'RIR 0–1',
             restSec: 90,
             restLabel: '1.5 мин',
-            muscle: 'Бицепс / Брахиалис',
-            note: 'Создает пиковый крутящий момент в нижней части амплитуды (при почти прямых руках). Опускай плавно!'
+            muscle: 'Бицепс',
+            step: 2.5,
+            note: 'Пиковый крутящий момент в нижней части амплитуды (при почти прямых руках).'
           }
         ]
       },
       lowerB: {
         id: 'lowerB',
-        title: 'День 4: Низ Б (Пт)',
-        subtitle: 'Задняя цепь, детализация ног и руки',
-        warmupNote: 'Выбери первое упражнение под цель: Болгарские сплит-приседы (чистая гипертрофия без утомления поясницы) или Становая тяга (силовая база).',
+        title: 'Пт • Низ Б (Задняя цепь и руки)',
+        subtitle: 'Детализация бедер, ягодиц, задней дельты и трицепса',
+        warmupNote: 'Болгарские приседы — для гипертрофии без нагрузки на поясницу; Становая — для силы.',
         exercises: [
           {
             id: 'lb_main',
-            name: 'Болгарские сплит-приседания ИЛИ Становая тяга',
-            variants: ['Болгарские сплит-приседы с гантелями (8–10 повт)', 'Становая тяга классика/трэп-гриф (5–6 повт)'],
+            name: 'Болгарские сплит-приседы / Становая тяга',
+            variants: ['Болгарские сплит-приседы (8–10)', 'Становая тяга (5–6)'],
             sets: 3,
             minReps: 8,
             maxReps: 10,
@@ -469,7 +501,8 @@
             rir: 'RIR 2',
             restSec: 180,
             restLabel: '3 мин',
-            muscle: 'Ягодицы / Бедра / Задняя цепь',
+            muscle: 'Бедра / Ягодицы',
+            step: 2,
             note: 'Болгарские: 3×8–10 на каждую ногу глубоко. Становая: 3×5–6 на силу.'
           },
           {
@@ -481,25 +514,27 @@
             rir: 'RIR 0–1',
             restSec: 120,
             restLabel: '2 мин',
-            muscle: 'Квадрицепс (прямая мышца бедра)',
-            note: 'Отодвинь спинку чуть назад (угол в тазу > 90°) — это полноценно включает прямую мышцу бедра.'
+            muscle: 'Квадрицепс',
+            step: 2.5,
+            note: 'Отодвинь спинку чуть назад (угол в тазу > 90°) — это включает прямую мышцу бедра.'
           },
           {
             id: 'lb_hyper_curl',
             name: 'Гиперэкстензия с весом / Сгибания ног',
-            variants: ['Гиперэкстензия с весом (круглая спина)', 'Сгибания ног сидя/лежа'],
+            variants: ['Гиперэкстензия (круглая спина)', 'Сгибания ног сидя/лежа'],
             sets: 3,
             minReps: 10,
             maxReps: 12,
             rir: 'RIR 1',
             restSec: 120,
             restLabel: '2 мин',
-            muscle: 'Бицепс бедра / Ягодицы',
-            note: 'В гиперэкстензии слегка скругли верх спины и тянись за счет сжатия ягодиц и бицепса бедра.'
+            muscle: 'Ягодицы / Бицепс бедра',
+            step: 2.5,
+            note: 'В гиперэкстензии слегка скругли верх спины и поднимайся за счет ягодиц и бицепса бедра.'
           },
           {
             id: 'lb_skullcrusher',
-            name: 'Французский жим с EZ-штангой лежа (за голову)',
+            name: 'Французский жим с EZ-штангой (за голову)',
             sets: 3,
             minReps: 8,
             maxReps: 12,
@@ -507,24 +542,26 @@
             restSec: 120,
             restLabel: '2 мин',
             muscle: 'Трицепс',
-            note: 'Опускай гриф за голову, а не ко лбу — это снимает нагрузку с локтей и растягивает длинную головку.'
+            step: 2.5,
+            note: 'Опускай гриф за голову, а не ко лбу — это бережет локти и растягивает длинную головку.'
           },
           {
             id: 'lb_facepull',
-            name: 'Тяга каната к лицу (Face Pull) / Обратный Пек-Дек',
-            variants: ['Тяга каната к лицу (Face Pull)', 'Обратные разведения в Пек-Дек'],
+            name: 'Тяга каната к лицу (Face Pull) / Пек-Дек',
+            variants: ['Тяга каната к лицу (Face Pull)', 'Обратный Пек-Дек'],
             sets: 3,
             minReps: 12,
             maxReps: 15,
             rir: 'RIR 1',
             restSec: 90,
             restLabel: '1.5 мин',
-            muscle: 'Задняя дельта / Ротаторы плеча',
-            note: 'Держи локти высоко, работай задней дельтой без сведения лопаток корпусом.'
+            muscle: 'Задняя дельта',
+            step: 2.5,
+            note: 'Задняя дельта и баланс плечевого сустава.'
           },
           {
             id: 'lb_calf_press',
-            name: 'Подъемы на носки в тренажере для жима ногами',
+            name: 'Подъемы на носки в жиме ногами',
             sets: 3,
             minReps: 12,
             maxReps: 15,
@@ -532,20 +569,22 @@
             restSec: 90,
             restLabel: '1.5 мин',
             muscle: 'Икры',
-            note: 'Обязательная пауза 2 секунды в нижней точке в полном растяжении.'
+            step: 5,
+            note: 'Пауза 2 секунды в нижней точке в полном растяжении.'
           }
         ]
       }
     };
 
     // ==========================================
-    // 2. СОСТОЯНИЕ И ДВОЙНОЕ ХРАНИЛИЩЕ (LOCALSTORAGE + INDEXEDDB)
+    // 2. ХРАНИЛИЩЕ (100% СОВМЕСТИМОСТЬ С УЖЕ ВВЕДЕННЫМИ ДАННЫМИ)
     // ==========================================
-    // Ключи хранилища неизменны — все введенные ранее данные полностью сохраняются!
     const STORAGE_KEY = 'gym738_tracker_v1';
     const IDB_NAME = 'gym738_idb';
     const IDB_STORE = 'state_store';
     let state = loadState();
+    let openTips = {};       // какие подсказки 💡 открыты
+    let manualExpand = {};   // какие выполненные карточки развернуты вручную
 
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().catch(() => {});
@@ -624,9 +663,9 @@
           badge.className = 'px-1.5 py-0.5 rounded-md bg-emerald-500 text-slate-950 text-[10px] font-bold transition';
           clearTimeout(saveFlashTimeout);
           saveFlashTimeout = setTimeout(() => {
-            badge.textContent = '✓ В памяти';
+            badge.textContent = '✓ Сохранено';
             badge.className = 'px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400 transition';
-          }, 900);
+          }, 800);
         }
       } catch (e) {
         console.error('Save error', e);
@@ -654,6 +693,36 @@
       return { min: ex.minReps, max: ex.maxReps };
     }
 
+    // Нормализация ввода для русской клавиатуры iPhone (заменяет запятую "," на точку ".")
+    function cleanDecimal(val) {
+      if (val === undefined || val === null) return '';
+      return String(val).replace(',', '.').replace(/[^0-9.]/g, '');
+    }
+
+    // Управление плавающей кнопкой закрытия клавиатуры на iOS
+    document.addEventListener('focusin', (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        const bar = document.getElementById('kbDismissBar');
+        if (bar) bar.classList.remove('hidden');
+      }
+    });
+    document.addEventListener('focusout', () => {
+      setTimeout(() => {
+        const active = document.activeElement;
+        if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
+          const bar = document.getElementById('kbDismissBar');
+          if (bar) bar.classList.add('hidden');
+        }
+      }, 100);
+    });
+
+    function dismissKeyboard(e) {
+      if (e) e.preventDefault();
+      if (document.activeElement) document.activeElement.blur();
+      const bar = document.getElementById('kbDismissBar');
+      if (bar) bar.classList.add('hidden');
+    }
+
     // ==========================================
     // 3. АЛГОРИТМ ДВОЙНОЙ ПРОГРЕССИИ
     // ==========================================
@@ -676,11 +745,12 @@
       const filledCur = curSets.filter(s => s.reps !== '' && Number(s.reps) > 0);
 
       if (filledCur.length === ex.sets && filledCur.every(s => Number(s.reps) >= range.max)) {
-        const w = Number(filledCur[0].weight) || 0;
-        const nextW = w > 0 ? ` (${w + 2.5} кг)` : '';
+        const w = Number(cleanDecimal(filledCur[0].weight)) || 0;
+        const step = ex.step || 2.5;
+        const nextW = w > 0 ? ` (${w + step} кг)` : '';
         return {
           type: 'levelup',
-          badge: `🚀 ВЕРХ ЗАКРЫТ! На след. неделе +вес${nextW}`,
+          badge: `🚀 ВЕРХ ЗАКРЫТ! След. тренировка: +вес${nextW}`,
           color: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40'
         };
       }
@@ -696,18 +766,19 @@
           const prevAllMax = filledPrev.length === ex.sets && filledPrev.every(s => Number(s.reps) >= range.max);
           const prevWeight = filledPrev[0].weight || '?';
           const prevRepsStr = prevSets.map(s => s.reps || '—').join(', ');
+          const step = ex.step || 2.5;
 
           if (prevAllMax) {
-            const suggestedWeight = Number(prevWeight) ? (Number(prevWeight) + 2.5) : '';
+            const suggestedWeight = Number(cleanDecimal(prevWeight)) ? (Number(cleanDecimal(prevWeight)) + step) : '';
             return {
               type: 'increase_weight_now',
-              badge: `🔥 ПОВЫШАЙ ВЕС СЕГОДНЯ (${suggestedWeight ? suggestedWeight + ' кг' : '+2–2.5 кг'})`,
+              badge: `🔥 ПОВЫШАЙ ВЕС СЕГОДНЯ (${suggestedWeight ? suggestedWeight + ' кг' : '+' + step + ' кг'})`,
               color: 'text-amber-300 bg-amber-500/20 border-amber-500/40'
             };
           } else {
             return {
               type: 'add_rep',
-              badge: `🎯 Цель: +1 повтор (Было: ${prevWeight} кг × ${prevRepsStr})`,
+              badge: `🎯 Цель: +1 повтор (Прошлый: ${prevWeight} кг × ${prevRepsStr})`,
               color: 'text-indigo-300 bg-indigo-500/15 border-indigo-500/30'
             };
           }
@@ -716,7 +787,7 @@
 
       return {
         type: 'start',
-        badge: `Двойная прогрессия: ${ex.sets} × ${range.min}–${range.max} (${ex.rir})`,
+        badge: `Цель: ${ex.sets} подхода × ${range.min}–${range.max} повт. (${ex.rir})`,
         color: 'text-slate-300 bg-slate-800/90 border-slate-700'
       };
     }
@@ -755,8 +826,13 @@
       render();
     }
 
+    function toggleTip(exId) {
+      openTips[exId] = !openTips[exId];
+      render();
+    }
+
     function updateHeaderWeight() {
-      const weights = Object.values(state.bodyWeight).filter(v => v && Number(v) > 0).map(Number);
+      const weights = Object.values(state.bodyWeight).filter(v => v && Number(cleanDecimal(v)) > 0).map(v => Number(cleanDecimal(v)));
       const el = document.getElementById('headerCurrentWeight');
       if (el) {
         el.textContent = weights.length > 0 ? weights[weights.length - 1].toFixed(1) : '73.0';
@@ -769,9 +845,9 @@
         const btn = document.getElementById(`tab-${t}`);
         if (!btn) return;
         if (t === state.currentTab) {
-          btn.className = 'tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30 transition';
+          btn.className = 'ios-btn py-2 rounded-xl text-[11px] font-extrabold text-center bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30 transition truncate';
         } else {
-          btn.className = 'tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800/80 text-slate-300 active:bg-slate-700 border border-slate-700/70 transition';
+          btn.className = 'ios-btn py-2 rounded-xl text-[11px] font-semibold text-center text-slate-400 active:bg-slate-800 transition truncate';
         }
       });
     }
@@ -789,8 +865,10 @@
           totalSets++;
           const d = getSetData(week, ex.id, s);
           if (d.done) doneSets++;
-          if (d.weight && d.reps) {
-            totalVolume += Number(d.weight) * Number(d.reps);
+          const wNum = Number(cleanDecimal(d.weight));
+          const rNum = Number(d.reps);
+          if (wNum > 0 && rNum > 0) {
+            totalVolume += wNum * rNum;
           }
         }
       });
@@ -798,28 +876,24 @@
       const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
 
       let html = `
-        <!-- Day Summary Card -->
-        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3.5 mb-3.5 shadow-lg">
-          <div class="flex items-start justify-between gap-2">
+        <!-- Компактная сводка дня -->
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3.5 mb-3 shadow-lg">
+          <div class="flex items-center justify-between gap-2">
             <div>
-              <h2 class="text-base font-bold text-white leading-tight">${day.title}</h2>
-              <p class="text-xs text-slate-400 mt-0.5">${day.subtitle}</p>
+              <h2 class="text-[15px] font-extrabold text-white leading-tight">${day.title}</h2>
+              <p class="text-[11px] text-slate-400 mt-0.5">${day.subtitle}</p>
             </div>
             <div class="text-right shrink-0">
-              <span class="text-xs font-mono font-bold text-emerald-400">${doneSets}/${totalSets} сетов</span>
-              <div class="text-[11px] text-slate-400">Тоннаж: <b class="text-slate-200">${totalVolume.toLocaleString('ru-RU')} кг</b></div>
+              <span class="text-xs font-mono font-extrabold text-emerald-400">${doneSets}/${totalSets} сетов</span>
+              <div class="text-[11px] text-slate-400">Тоннаж: <b class="text-slate-200">${Math.round(totalVolume).toLocaleString('ru-RU')} кг</b></div>
             </div>
           </div>
-          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2.5">
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
             <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
           </div>
-          <p class="text-[11px] text-slate-400 mt-2 flex items-start gap-1.5 leading-snug">
-            <span class="text-amber-400 shrink-0">⚡</span>
-            <span>${day.warmupNote}</span>
-          </p>
         </div>
 
-        <div class="space-y-3.5">
+        <div class="space-y-3">
       `;
 
       day.exercises.forEach((ex, idx) => {
@@ -827,18 +901,31 @@
         const prog = evaluateProgression(week, ex);
         const variantIdx = state.selectedVariants[ex.id] || 0;
         const displayName = ex.variants ? ex.variants[variantIdx] : ex.name;
+        const tipOpen = !!openTips[ex.id];
+
+        // Проверяем, сколько сетов выполнено в этом упражнении
+        let exDoneCount = 0;
+        for (let s = 1; s <= ex.sets; s++) {
+          if (getSetData(week, ex.id, s).done) exDoneCount++;
+        }
+        const allExDone = (exDoneCount === ex.sets);
 
         html += `
-          <div class="bg-slate-900/95 border border-slate-800/90 rounded-2xl p-3.5 shadow-md" id="card-${ex.id}">
-            <!-- Exercise Header -->
+          <div class="bg-slate-900/95 border ${allExDone ? 'border-emerald-500/40' : 'border-slate-800/90'} rounded-2xl p-3.5 shadow-md transition" id="card-${ex.id}">
+            <!-- Шапка упражнения -->
             <div class="flex items-start justify-between gap-2 mb-2">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="px-1.5 py-0.5 rounded-md bg-slate-800 text-[10px] font-bold text-emerald-400 border border-slate-700">#${idx + 1}</span>
-                  <span class="text-[11px] font-medium text-slate-400">${ex.muscle}</span>
-                  <span class="text-[11px] text-slate-500">•</span>
-                  <button onclick="setTimerPreset(${ex.restSec}, true)" class="text-[11px] font-semibold text-sky-400 active:opacity-70 flex items-center gap-0.5">
+                  <span class="px-1.5 py-0.5 rounded-md ${allExDone ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-emerald-400 border border-slate-700'} text-[10px] font-extrabold">
+                    ${allExDone ? '✓ #' + (idx + 1) : '#' + (idx + 1)}
+                  </span>
+                  <span class="text-[11px] font-semibold text-slate-400">${ex.muscle}</span>
+                  <span class="text-[11px] text-slate-600">•</span>
+                  <button type="button" onclick="setTimerPreset(${ex.restSec}, true)" class="ios-btn text-[11px] font-bold text-sky-400 flex items-center gap-0.5">
                     ⏱ ${ex.restLabel}
+                  </button>
+                  <button type="button" onclick="toggleTip('${ex.id}')" class="ios-btn ml-auto px-2 py-0.5 rounded-lg bg-slate-800/90 border border-slate-700/80 text-[10px] font-semibold text-slate-300">
+                    💡 Техника
                   </button>
                 </div>
                 <h3 class="text-[15px] font-bold text-white mt-1 leading-snug">${displayName}</h3>
@@ -847,41 +934,43 @@
                 <span class="inline-block px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-white">
                   ${ex.sets} × ${range.min}–${range.max}
                 </span>
-                <div class="text-[10px] font-semibold text-amber-400/90 mt-0.5">${ex.rir}</div>
+                <div class="text-[10px] font-bold text-amber-400/90 mt-0.5">${ex.rir}</div>
               </div>
             </div>
 
-            <!-- Variant Switcher -->
+            <!-- Переключатель альтернативных упражнений -->
             ${ex.variants ? `
-              <div class="flex gap-1 mb-2.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
+              <div class="flex gap-1 mb-2.5 bg-slate-950/90 p-1 rounded-xl border border-slate-800/80">
                 ${ex.variants.map((v, vIdx) => `
-                  <button onclick="selectVariant('${ex.id}', ${vIdx})" class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-medium transition truncate ${variantIdx === vIdx ? 'bg-slate-800 text-emerald-400 font-bold border border-slate-700' : 'text-slate-400'}">
+                  <button type="button" onclick="selectVariant('${ex.id}', ${vIdx})" class="ios-btn flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold transition truncate ${variantIdx === vIdx ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'text-slate-400'}">
                     ${v}
                   </button>
                 `).join('')}
               </div>
             ` : ''}
 
-            <!-- Biomechanics tip -->
-            <p class="text-[11px] text-slate-400 leading-relaxed mb-2.5 bg-slate-950/50 px-2.5 py-1.5 rounded-xl border border-slate-800/60">
-              💡 ${ex.note}
-            </p>
+            <!-- Сворачиваемая подсказка по технике (не засоряет экран на iPhone) -->
+            ${tipOpen ? `
+              <p class="text-xs text-slate-300 leading-relaxed mb-2.5 bg-slate-950/80 px-3 py-2 rounded-xl border border-slate-800">
+                💡 ${ex.note}
+              </p>
+            ` : ''}
 
-            <!-- Double Progression Status Banner -->
-            <div class="mb-2.5 px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 ${prog.color}" id="prog-${ex.id}">
+            <!-- Плашка двойной прогрессии -->
+            <div class="mb-2.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold flex items-center justify-between gap-2 ${prog.color}" id="prog-${ex.id}">
               <span>${prog.badge}</span>
             </div>
 
-            <!-- Sets Table Header (адаптировано под 390px ширину iPhone 14) -->
-            <div class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1.5 mb-1">
-              <div class="w-6 text-center">Сет</div>
-              <div class="flex-1">Прошлый раз</div>
-              <div class="w-[78px] text-center">Вес (кг)</div>
-              <div class="w-[64px] text-center">Повт.</div>
-              <div class="w-[44px] text-center">ОК</div>
+            <!-- Заголовки колонок -->
+            <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-1">
+              <div class="w-5 text-center">#</div>
+              <div class="flex-1">Прошлый (тап=копия)</div>
+              <div class="w-[76px] text-center">Вес кг</div>
+              <div class="w-[88px] text-center">Повторы</div>
+              <div class="w-[42px] text-center">ОК</div>
             </div>
 
-            <!-- Sets Rows -->
+            <!-- Строки подходов -->
             <div class="space-y-2">
         `;
 
@@ -889,7 +978,7 @@
           const cur = getSetData(week, ex.id, s);
           const prev = prevWeek >= 1 ? getSetData(prevWeek, ex.id, s) : { weight: '', reps: '' };
           const hasPrev = prev.weight !== '' || prev.reps !== '';
-          const prevText = hasPrev ? `${prev.weight || 0} кг × ${prev.reps || 0}` : '—';
+          const prevText = hasPrev ? `${prev.weight || 0}×${prev.reps || 0}` : '—';
 
           const set1 = getSetData(week, ex.id, 1);
           const weightPlaceholder = prev.weight !== '' ? prev.weight : (set1.weight !== '' ? set1.weight : 'кг');
@@ -899,58 +988,69 @@
 
           html += `
             <div id="row-${ex.id}-${s}" class="flex items-center gap-1.5 p-1.5 rounded-2xl border border-slate-800/90 bg-slate-950/70 transition ${cur.done ? 'set-done' : ''}">
-              <!-- Set Number -->
-              <div class="w-6 text-center font-mono text-xs font-extrabold ${cur.done ? 'text-emerald-400' : 'text-slate-400'}">
+              <!-- Номер сета -->
+              <div class="w-5 text-center font-mono text-xs font-extrabold ${cur.done ? 'text-emerald-400' : 'text-slate-400'}">
                 ${s}
               </div>
 
-              <!-- Previous Week (Tap to autofill) -->
+              <!-- Прошлый результат (тап копирует вес и повторы!) -->
               <div class="flex-1 min-w-0">
                 <button
                   type="button"
-                  onclick="copyFromPrev(${week}, '${ex.id}', ${s}, '${prev.weight}', '${prev.reps}', ${ex.restSec})"
-                  class="w-full h-10 text-left px-2.5 rounded-xl bg-slate-900/90 border border-slate-800/90 text-xs font-mono ${hasPrev ? 'text-slate-300 active:scale-95 active:border-emerald-500/50' : 'text-slate-600'} truncate transition flex items-center"
+                  onclick="copyFromPrev(${week}, '${ex.id}', ${s}, '${prev.weight}', '${prev.reps}')"
+                  class="ios-btn w-full h-10 text-left px-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono ${hasPrev ? 'text-slate-200 font-semibold' : 'text-slate-600'} truncate flex items-center justify-between"
                 >
-                  ${prevText}
+                  <span>${prevText}</span>
+                  ${hasPrev ? '<span class="text-[10px] text-emerald-400/80 ml-1">⎘</span>' : ''}
                 </button>
               </div>
 
-              <!-- Weight Input (16px font = no iOS zoom, 40px height) -->
-              <div class="w-[78px]">
+              <!-- Поле Вес (кг) — понимает и точку, и запятую на iPhone -->
+              <div class="w-[76px]">
                 <input
-                  type="number"
-                  step="0.5"
+                  id="inp-w-${ex.id}-${s}"
+                  type="text"
                   inputmode="decimal"
                   enterkeyhint="done"
                   placeholder="${weightPlaceholder}"
                   value="${cur.weight}"
                   oninput="onSetInput(${week}, '${ex.id}', ${s}, 'weight', this.value)"
                   onkeydown="if(event.key==='Enter') this.blur()"
-                  class="w-full h-10 text-center font-mono font-bold bg-slate-900 border border-slate-700/90 rounded-xl px-1 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  class="w-full h-10 text-center font-mono font-extrabold bg-slate-900 border border-slate-700/90 rounded-xl px-1 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <!-- Reps Input (16px font = no iOS zoom, 40px height) -->
-              <div class="w-[64px]">
+              <!-- Поле Повторы с кнопками - / + для управления одним пальцем без клавиатуры -->
+              <div class="w-[88px] flex items-center bg-slate-900 border ${isTopRep ? 'border-emerald-500/70' : 'border-slate-700/90'} rounded-xl h-10 overflow-hidden">
+                <button
+                  type="button"
+                  onclick="stepRep(${week}, '${ex.id}', ${s}, -1, ${range.min})"
+                  class="ios-btn w-6 h-full flex items-center justify-center text-slate-400 active:bg-slate-800 font-bold text-sm select-none"
+                >−</button>
                 <input
-                  type="number"
-                  step="1"
+                  id="inp-r-${ex.id}-${s}"
+                  type="text"
                   inputmode="numeric"
                   enterkeyhint="done"
                   placeholder="${repsPlaceholder}"
                   value="${cur.reps}"
                   oninput="onSetInput(${week}, '${ex.id}', ${s}, 'reps', this.value)"
                   onkeydown="if(event.key==='Enter') this.blur()"
-                  class="w-full h-10 text-center font-mono font-bold bg-slate-900 border ${isTopRep ? 'border-emerald-500/70 text-emerald-300' : 'border-slate-700/90 text-white'} rounded-xl px-1 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  class="w-full h-full text-center font-mono font-extrabold bg-transparent ${isTopRep ? 'text-emerald-300' : 'text-white'} placeholder-slate-600 focus:outline-none px-0"
                 />
+                <button
+                  type="button"
+                  onclick="stepRep(${week}, '${ex.id}', ${s}, 1, ${range.min})"
+                  class="ios-btn w-6 h-full flex items-center justify-center text-emerald-400 active:bg-slate-800 font-bold text-sm select-none"
+                >+</button>
               </div>
 
-              <!-- Complete Set & Start Rest Timer Button (44x40px Apple HIG touch target) -->
-              <div class="w-[44px]">
+              <!-- Кнопка Готово ✓ (запускает таймер отдыха и прячет клавиатуру) -->
+              <div class="w-[42px]">
                 <button
                   type="button"
                   onclick="toggleSetDone(${week}, '${ex.id}', ${s}, ${ex.restSec})"
-                  class="w-full h-10 rounded-xl font-bold text-sm flex items-center justify-center transition active:scale-90 ${cur.done ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25' : 'bg-slate-800 text-slate-400 border border-slate-700'}"
+                  class="ios-btn w-full h-10 rounded-xl font-extrabold text-sm flex items-center justify-center transition ${cur.done ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25' : 'bg-slate-800 text-slate-400 border border-slate-700'}"
                 >
                   ✓
                 </button>
@@ -965,16 +1065,16 @@
         html += `
             </div>
 
-            <!-- Quick Note Input -->
-            <div class="mt-2.5">
+            <!-- Заметка к упражнению -->
+            <div class="mt-2">
               <input
                 type="text"
                 enterkeyhint="done"
-                placeholder="Заметка (напр., высота сиденья, положение рукояти)..."
+                placeholder="Заметка (напр., высота сиденья, легко/тяжело)..."
                 value="${curNote.replace(/"/g, '&quot;')}"
                 oninput="onNoteInput('${noteKey}', this.value)"
                 onkeydown="if(event.key==='Enter') this.blur()"
-                class="w-full bg-slate-950/40 rounded-xl px-3 py-2 border border-slate-800/80 focus:border-emerald-500/60 text-slate-200 placeholder-slate-600 focus:outline-none"
+                class="w-full bg-slate-950/50 rounded-xl px-3 py-1.5 border border-slate-800/80 focus:border-emerald-500/60 text-slate-200 placeholder-slate-600 focus:outline-none"
               />
             </div>
           </div>
@@ -985,8 +1085,25 @@
       document.getElementById('mainContainer').innerHTML = html;
     }
 
-    function onSetInput(week, exId, setIdx, field, value) {
+    function onSetInput(week, exId, setIdx, field, rawValue) {
+      const value = field === 'weight' ? cleanDecimal(rawValue) : rawValue.replace(/[^0-9]/g, '');
       setSetData(week, exId, setIdx, { [field]: value });
+
+      // Авто-подстановка рабочего веса из 1-го подхода в пустые подходы 2..N
+      if (field === 'weight' && setIdx === 1 && value !== '') {
+        const day = PROGRAM[state.currentTab];
+        const ex = day && day.exercises.find(e => e.id === exId);
+        if (ex) {
+          for (let s = 2; s <= ex.sets; s++) {
+            const other = getSetData(week, exId, s);
+            const inpEl = document.getElementById(`inp-w-${exId}-${s}`);
+            if (inpEl && other.weight === '') {
+              inpEl.placeholder = value;
+            }
+          }
+        }
+      }
+
       const day = PROGRAM[state.currentTab];
       if (day) {
         const ex = day.exercises.find(e => e.id === exId);
@@ -994,11 +1111,34 @@
           const prog = evaluateProgression(week, ex);
           const progEl = document.getElementById(`prog-${ex.id}`);
           if (progEl) {
-            progEl.className = `mb-2.5 px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 ${prog.color}`;
+            progEl.className = `mb-2.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold flex items-center justify-between gap-2 ${prog.color}`;
             progEl.innerHTML = `<span>${prog.badge}</span>`;
           }
         }
       }
+    }
+
+    // Быстрое изменение повторов кнопками - / + без открытия клавиатуры
+    function stepRep(week, exId, setIdx, delta, defaultMin) {
+      const cur = getSetData(week, exId, setIdx);
+      const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
+      const prev = prevWeek >= 1 ? getSetData(prevWeek, exId, setIdx) : { weight: '', reps: '' };
+      const set1 = getSetData(week, exId, 1);
+
+      let baseRep = cur.reps !== '' ? Number(cur.reps) : (prev.reps !== '' ? Number(prev.reps) : defaultMin);
+      let nextRep = Math.max(0, baseRep + delta);
+
+      let nextWeight = cur.weight;
+      if (nextWeight === '') {
+        if (set1.weight !== '') nextWeight = set1.weight;
+        else if (prev.weight !== '') nextWeight = prev.weight;
+      }
+
+      setSetData(week, exId, setIdx, {
+        weight: nextWeight,
+        reps: String(nextRep)
+      });
+      render();
     }
 
     function onNoteInput(noteKey, value) {
@@ -1006,20 +1146,19 @@
       saveState();
     }
 
-    function copyFromPrev(week, exId, setIdx, prevWeight, prevReps, restSec) {
+    function copyFromPrev(week, exId, setIdx, prevWeight, prevReps) {
       if (!prevWeight && !prevReps) return;
-      const cur = getSetData(week, exId, setIdx);
       setSetData(week, exId, setIdx, {
-        weight: cur.weight !== '' ? cur.weight : prevWeight,
-        reps: cur.reps !== '' ? cur.reps : prevReps
+        weight: prevWeight,
+        reps: prevReps
       });
       render();
     }
 
     function toggleSetDone(week, exId, setIdx, restSec) {
-      if (document.activeElement && document.activeElement.tagName === 'INPUT') {
-        document.activeElement.blur();
-      }
+      dismissKeyboard();
+      unlockAudio();
+
       const cur = getSetData(week, exId, setIdx);
       const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
       const prev = prevWeek >= 1 ? getSetData(prevWeek, exId, setIdx) : { weight: '', reps: '' };
@@ -1059,10 +1198,10 @@
       const curWeights = [];
       const prevWeights = [];
       for (let d = 1; d <= 7; d++) {
-        const cw = Number(state.bodyWeight[`w${week}_d${d}`]);
+        const cw = Number(cleanDecimal(state.bodyWeight[`w${week}_d${d}`]));
         if (cw > 0) curWeights.push(cw);
         if (week > 1) {
-          const pw = Number(state.bodyWeight[`w${week - 1}_d${d}`]);
+          const pw = Number(cleanDecimal(state.bodyWeight[`w${week - 1}_d${d}`]));
           if (pw > 0) prevWeights.push(pw);
         }
       }
@@ -1087,14 +1226,14 @@
 
       let html = `
         <div class="space-y-3.5">
-          <!-- Daily Checklist Card -->
+          <!-- Чек-лист на день -->
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
             <div class="flex items-center justify-between mb-3">
-              <h2 class="text-sm font-bold text-white">Чек-лист на день (183 см / 73 кг)</h2>
+              <h2 class="text-sm font-bold text-white">Чек-лист на сегодня (183 см / 73 кг)</h2>
               <span class="text-[11px] font-mono text-slate-400">${todayKey}</span>
             </div>
             <div class="grid grid-cols-2 gap-2.5">
-              <button onclick="toggleDailyCheck('${todayKey}', 'kcal')" class="p-3 rounded-2xl border text-left transition active:scale-95 ${todayChecks.kcal ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <button onclick="toggleDailyCheck('${todayKey}', 'kcal')" class="ios-btn p-3 rounded-2xl border text-left transition ${todayChecks.kcal ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                 <div class="text-xs font-bold flex items-center justify-between">
                   <span>🔥 2950 ккал</span>
                   <span>${todayChecks.kcal ? '✅' : '⬜'}</span>
@@ -1102,7 +1241,7 @@
                 <div class="text-[10px] text-slate-400 mt-1">Профицит +350 ккал</div>
               </button>
 
-              <button onclick="toggleDailyCheck('${todayKey}', 'protein')" class="p-3 rounded-2xl border text-left transition active:scale-95 ${todayChecks.protein ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <button onclick="toggleDailyCheck('${todayKey}', 'protein')" class="ios-btn p-3 rounded-2xl border text-left transition ${todayChecks.protein ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                 <div class="text-xs font-bold flex items-center justify-between">
                   <span>🥩 135 г белка</span>
                   <span>${todayChecks.protein ? '✅' : '⬜'}</span>
@@ -1110,7 +1249,7 @@
                 <div class="text-[10px] text-slate-400 mt-1">120–145 г в сутки</div>
               </button>
 
-              <button onclick="toggleDailyCheck('${todayKey}', 'creatine')" class="p-3 rounded-2xl border text-left transition active:scale-95 ${todayChecks.creatine ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <button onclick="toggleDailyCheck('${todayKey}', 'creatine')" class="ios-btn p-3 rounded-2xl border text-left transition ${todayChecks.creatine ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                 <div class="text-xs font-bold flex items-center justify-between">
                   <span>⚡ Креатин 5 г</span>
                   <span>${todayChecks.creatine ? '✅' : '⬜'}</span>
@@ -1118,7 +1257,7 @@
                 <div class="text-[10px] text-slate-400 mt-1">Моногидрат ежедневно</div>
               </button>
 
-              <button onclick="toggleDailyCheck('${todayKey}', 'shake')" class="p-3 rounded-2xl border text-left transition active:scale-95 ${todayChecks.shake ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <button onclick="toggleDailyCheck('${todayKey}', 'shake')" class="ios-btn p-3 rounded-2xl border text-left transition ${todayChecks.shake ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                 <div class="text-xs font-bold flex items-center justify-between">
                   <span>🥤 Шейк 750 ккал</span>
                   <span>${todayChecks.shake ? '✅' : '⬜'}</span>
@@ -1143,7 +1282,7 @@
             </div>
           </div>
 
-          <!-- Morning Body Weight Tracker -->
+          <!-- Утренний вес -->
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
             <div class="flex items-center justify-between mb-1">
               <h2 class="text-sm font-bold text-white">Утренний вес — Неделя ${week}</h2>
@@ -1153,7 +1292,7 @@
             </div>
             <p class="text-xs mb-3">${diffBadge}</p>
 
-            <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
+            <div class="grid grid-cols-4 gap-2">
               ${days.map((dName, idx) => {
                 const dIdx = idx + 1;
                 const val = state.bodyWeight[`w${week}_d${dIdx}`] || '';
@@ -1161,8 +1300,7 @@
                   <div class="bg-slate-950/70 p-2 rounded-xl border border-slate-800/80 text-center">
                     <div class="text-[10px] text-slate-400 mb-1 font-semibold">${dName}</div>
                     <input
-                      type="number"
-                      step="0.1"
+                      type="text"
                       inputmode="decimal"
                       enterkeyhint="done"
                       placeholder="73.0"
@@ -1191,19 +1329,19 @@
     }
 
     function onBodyWeightInput(week, dayIdx, val) {
-      state.bodyWeight[`w${week}_d${dayIdx}`] = val;
+      state.bodyWeight[`w${week}_d${dayIdx}`] = cleanDecimal(val);
       saveState();
     }
 
     // ==========================================
-    // 6. ВКЛАДКА: СВОДКА И ПРОГРЕСС ПО НЕДЕЛЯМ
+    // 6. ВКЛАДКА: СВОДКА ПО НЕДЕЛЯМ
     // ==========================================
     function renderStats() {
       let html = `
         <div class="space-y-3">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
             <h2 class="text-sm font-bold text-white mb-1">Сводка рабочих весов (Недели 1–8)</h2>
-            <p class="text-xs text-slate-400 mb-3">Лучший сет (Вес × Повторы) по неделям:</p>
+            <p class="text-xs text-slate-400 mb-3">Лучший подход (Вес × Повторы) по неделям:</p>
             <div class="overflow-x-auto no-scrollbar">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
@@ -1229,7 +1367,7 @@
             for (let s = 1; s <= ex.sets; s++) {
               const d = getSetData(w, ex.id, s);
               if (d.weight !== '' || d.reps !== '') {
-                const score = (Number(d.weight) || 1) * (Number(d.reps) || 0);
+                const score = (Number(cleanDecimal(d.weight)) || 1) * (Number(d.reps) || 0);
                 if (score > bestScore) {
                   bestScore = score;
                   best = `${d.weight || 0}×${d.reps || 0}`;
@@ -1266,11 +1404,24 @@
     }
 
     // ==========================================
-    // 7. ТАЙМЕР ОТДЫХА СО ЗВУКОМ
+    // 7. ТАЙМЕР ОТДЫХА СО ЗВУКОМ (АДАПТИРОВАН ПОД IOS)
     // ==========================================
     let timerTotal = 150;
     let timerRemaining = 150;
     let timerInterval = null;
+    let timerEndTime = null;
+    let sharedAudioCtx = null;
+
+    function unlockAudio() {
+      try {
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+      } catch (e) {}
+    }
 
     function formatTime(sec) {
       const m = Math.floor(sec / 60);
@@ -1282,37 +1433,46 @@
       const disp = document.getElementById('timerDisplay');
       const bar = document.getElementById('timerProgressBar');
       const lbl = document.getElementById('timerStatusLabel');
+      const bottomBar = document.getElementById('bottomTimerBar');
       if (disp) disp.textContent = formatTime(timerRemaining);
       if (bar) {
         const pct = timerTotal > 0 ? Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100)) : 0;
         bar.style.width = `${pct}%`;
       }
       if (lbl) {
-        lbl.textContent = timerInterval ? 'Отдых...' : (timerRemaining === 0 ? '🔥 В ПОДХОД!' : 'Отдых');
-        lbl.className = timerRemaining === 0 ? 'text-[11px] font-bold text-emerald-400 animate-pulse' : 'text-[11px] text-slate-400';
+        lbl.textContent = timerInterval ? 'Идет отдых...' : (timerRemaining === 0 ? '🔥 В ПОДХОД!' : 'Отдых');
+        lbl.className = timerRemaining === 0 ? 'text-[11px] font-extrabold text-emerald-400 animate-pulse' : 'text-[11px] font-medium text-slate-400';
+      }
+      if (bottomBar) {
+        if (timerRemaining === 0) {
+          bottomBar.classList.add('border-emerald-500');
+        } else {
+          bottomBar.classList.remove('border-emerald-500');
+        }
       }
     }
 
     function playBeep() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 0.2, 0.4].forEach(delay => {
+        unlockAudio();
+        const ctx = sharedAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.18, 0.36].forEach(delay => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.value = 880;
-          gain.gain.setValueAtTime(0.25, ctx.currentTime + delay);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.15);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.14);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(ctx.currentTime + delay);
-          osc.stop(ctx.currentTime + delay + 0.15);
+          osc.stop(ctx.currentTime + delay + 0.14);
         });
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       } catch (e) {}
     }
 
     function setTimerPreset(seconds, autoStart = true) {
+      unlockAudio();
       timerTotal = seconds;
       timerRemaining = seconds;
       if (timerInterval) {
@@ -1327,30 +1487,41 @@
     }
 
     function adjustTimer(delta) {
+      unlockAudio();
       timerRemaining = Math.max(0, timerRemaining + delta);
       timerTotal = Math.max(timerTotal, timerRemaining);
+      if (timerInterval && timerEndTime) {
+        timerEndTime += delta * 1000;
+      }
       updateTimerUI();
     }
 
+    // Используем реальные метки времени (Date.now()), чтобы таймер на iPhone не отставал даже при блокировке экрана!
     function startTimer() {
       if (timerRemaining <= 0) timerRemaining = timerTotal;
+      timerEndTime = Date.now() + timerRemaining * 1000;
       timerInterval = setInterval(() => {
-        timerRemaining--;
-        if (timerRemaining <= 0) {
+        const left = Math.round((timerEndTime - Date.now()) / 1000);
+        if (left <= 0) {
           timerRemaining = 0;
           clearInterval(timerInterval);
           timerInterval = null;
+          timerEndTime = null;
           playBeep();
+        } else {
+          timerRemaining = left;
         }
         updateTimerUI();
-      }, 1000);
+      }, 500);
       updateTimerUI();
     }
 
     function toggleTimer() {
+      unlockAudio();
       if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
+        timerEndTime = null;
         updateTimerUI();
       } else {
         startTimer();
@@ -1358,7 +1529,7 @@
     }
 
     // ==========================================
-    // 8. ЭКСПОРТ CSV / JSON БЭКАП И ОБНОВЛЕНИЕ
+    // 8. ЭКСПОРТ CSV / JSON БЭКАП
     // ==========================================
     function openDataModal() {
       document.getElementById('dataModal').classList.remove('hidden');
@@ -1465,16 +1636,6 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
         reg.update().catch(() => {});
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'activated') {
-                window.location.reload();
-              }
-            });
-          }
-        });
       }).catch(() => {});
     }
   </script>
