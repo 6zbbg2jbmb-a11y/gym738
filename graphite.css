@@ -1,0 +1,144 @@
+/* The same graphite and brass tokens power the app shell and the workout route. */
+:root {
+  --bg: #1e1d1b;
+  --surface: #2b2925;
+  --field: #39362f;
+  --line: #4d4942;
+  --text: #f6f0e5;
+  --muted: #c8c0b3;
+  --accent: #d8b779;
+  --onaccent: #2c261b;
+  --edge: #645e52;
+  --well: #24221f;
+  --base: var(--bg);
+  --paper: var(--surface);
+  --light: var(--field);
+  --ink: var(--text);
+  --sub: var(--muted);
+  --shell-wide: 1190px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+::selection { background: var(--accent); color: var(--onaccent); }
+input::placeholder, textarea::placeholder { color: #aaa296; }
+.app-header { background: var(--bg); }
+.brand .production-brand { display:flex; align-items:center; gap:8px; line-height:1.15; letter-spacing:-.07em; }
+.production-brand svg { width:27px; height:23px; flex:none; color:var(--accent); }
+.save-status[data-error="true"], .dialog-actions .danger { color:#e7b995; }
+.week-picker select, .icon-button, .timer-add { background:var(--surface); border:1px solid var(--edge); }
+.primary-nav { grid-template-columns:repeat(3,minmax(0,1fr)); padding-bottom:0; gap:3px; }
+.primary-nav button { border-radius:0; border-bottom:2px solid transparent; }
+.primary-nav button[aria-current="page"] { color:var(--accent); background:transparent; border-bottom-color:var(--accent); }
+.day-switcher { background:var(--well); border-color:var(--line); }
+.day-switcher button[aria-pressed="true"] { background:#4e4433; color:#eed3a3; }
+.icon-button:hover,.timer-add:hover { border-color:#8a7f6a; }
+.timer-dock { background:var(--bg); }
+.timer-toggle,.done-button[aria-pressed="true"] { color:var(--onaccent); }
+.variant-options button[aria-pressed="true"], .exercise-card.is-complete { border-color:#887654; }
+.dialog-actions .danger { border-color:#79634f; }
+dialog::backdrop { background:#100e0bcc; }
+
+#mainContainer .view-page {
+  --view-surface:var(--surface);
+  --view-accent:var(--accent);
+  --view-text:var(--text);
+  --view-muted:var(--muted);
+  --view-border:var(--line);
+}
+.view-page .view-title { font-family:Georgia,"Times New Roman",serif; font-size:clamp(34px,5vw,58px); font-weight:500; line-height:1.05; letter-spacing:-.055em; }
+.view-check-mark { border-color:var(--edge); }
+.view-check[aria-pressed="true"] .view-check-mark { color:var(--onaccent); }
+.view-period button[aria-pressed="true"] { color:var(--accent); background:#463d2f; }
+.view-week-cell,.view-weight-field input { background:var(--well); }
+.view-week-cell--current { border-color:#9b825e; }
+.view-week-cell--empty .view-week-weight, .view-weight-field input::placeholder { color:#aaa296; }
+.view-weight-field input { border-color:var(--edge); }
+.view-trend--attention { color:#e0c69c; }
+
+#rhythmRoot { min-width:0; }
+#fullWorkoutLog { margin:14px 0 0; border:1px solid var(--line); border-radius:15px; background:var(--well); }
+#fullWorkoutLog > summary {
+  display:flex; align-items:center; justify-content:space-between; min-height:54px; padding:12px 16px;
+  cursor:pointer; color:var(--text); font-size:15px; font-weight:560;
+}
+#fullWorkoutLog > summary::after, #rhythmTechnique > summary::after {
+  content:""; width:7px; height:7px; flex:none; border:solid var(--muted); border-width:0 1.5px 1.5px 0;
+  transform:rotate(45deg); margin:0 3px 3px 12px;
+}
+:is(#fullWorkoutLog,#rhythmTechnique)[open] > summary::after { transform:rotate(225deg); margin-top:6px; }
+#fullWorkoutLog[open] { padding:0 10px 10px; }
+#fullWorkoutLog[open] > summary { margin:0 -10px 10px; border-bottom:1px solid var(--line); }
+#fullWorkoutLog .exercise-list { gap:10px; }
+#fullWorkoutLog .exercise-card { border-radius:13px; }
+@media(min-width:761px) {
+  #appHeader > .shell,#mainContainer.shell { width:100%; max-width:calc(var(--shell-wide) + 60px); padding-inline:max(30px,var(--safe-left)) max(30px,var(--safe-right)); }
+  #appHeader { padding-top:calc(var(--safe-top) + 15px); }
+  .topline { min-height:56px; }
+  .primary-nav { width:min(100%,430px); }
+  #mainContainer > .day-switcher { max-width:460px; margin-bottom:0; }
+  #fullWorkoutLog .exercise-list { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  .view-nutrition { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  .view-nutrition .view-page-heading, .view-stat-group .view-group-title { grid-column:1/-1; }
+  .view-period { max-width:390px; }
+  .view-stat-group { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #bottomTimerBar { left:max(14px,var(--safe-left)); right:max(14px,var(--safe-right)); bottom:var(--safe-bottom); border-top:1px solid var(--edge); border-inline:1px solid var(--edge); border-radius:15px 15px 0 0; max-width:590px; margin-inline:auto; background:var(--surface); padding:9px 0 8px; box-shadow:0 4px 16px #0003; }
+  #bottomTimerBar .timer-add, #bottomTimerBar .icon-button { background:var(--field); }
+}
+@media(max-width:760px) {
+  .topline { padding-bottom:8px; }
+  .app-header { padding-top:calc(var(--safe-top) + 6px); }
+  #mainContainer > .day-switcher { margin-bottom:0; }
+}
+#rhythmSetDialog {
+  width: min(445px,calc(100% - 32px)); max-width: 100%; max-height: min(86dvh,780px);
+  margin:auto; padding:0; color:var(--ink); background:var(--paper);
+  border:1px solid var(--edge); border-radius:21px; box-shadow:0 16px 58px #0006;
+  overflow:auto; overscroll-behavior:contain;
+}
+#rhythmSetDialog:not([open]) { display:none; }
+#rhythmSetDialog::backdrop { background: #0d0c0ac9; }
+#rhythmSetForm { padding:24px; display:flex; flex-direction:column; gap:14px; }
+#rhythmSetForm header { position:relative; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+#rhythmSetTitle { font-size:clamp(23px,5vw,31px); font-weight:570; letter-spacing:-.048em; line-height:1.12; overflow-wrap:anywhere; }
+#rhythmSetStep { color:var(--accent); font-size:12px; font-weight:570; }
+#rhythmSetPlan, #rhythmSetError, #rhythmSetForm details p { font-size:13px; line-height:1.45; color:var(--sub); }
+#rhythmSetError { color:#efbf93; }
+#rhythmSetForm label { display:flex; flex-direction:column; gap:5px; font-size:12px; font-weight:520; color:var(--sub); }
+#rhythmSetForm [hidden] { display:none !important; }
+#rhythmSetForm .rhythm-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+#rhythmSetForm :is(input,select,textarea) {
+  min-width:0; width:100%; min-height:46px; border:1px solid var(--edge);
+  border-radius:9px; background:var(--well); color:var(--ink); padding:8px 11px;
+}
+#rhythmSetForm select { appearance:auto; }
+#rhythmSetForm :is(button,summary) { min-height:44px; }
+#rhythmClose {
+  display:grid;place-items:center; flex:none; width:44px; height:44px;
+  background:var(--light); color:var(--ink); border:1px solid var(--line); border-radius:50%;
+}
+#rhythmTechnique { border-block:1px solid var(--line); }
+#rhythmTechnique > summary { display:flex; align-items:center; justify-content:space-between; cursor:pointer; list-style:none; font-size:14px; font-weight:570; }
+#rhythmTechnique[open] { padding-bottom:12px; }
+#rhythmTechnique p { margin:6px 0 9px; }
+#rhythmPrevious,#rhythmSubmit,#rhythmUndo {
+  padding:9px 13px; text-align:center; border:1px solid var(--edge); border-radius:10px;
+  background:var(--light); color:var(--ink); font-size:14px; font-weight:560;
+}
+#rhythmSubmit { border-color:var(--accent); background:var(--accent); color:var(--onaccent); min-height:50px!important; font-size:16px; }
+#rhythmUndo { color:#e1bd9e; background:transparent; border-color:transparent; }
+
+@media (max-width:720px) {
+  #rhythmSetDialog { inset:auto 0 0; width:100%; margin:0; max-height:calc(92dvh - var(--safe-top)); border-radius:19px 19px 0 0; border-bottom:0; }
+  #rhythmSetForm { padding:19px max(17px,var(--safe-right)) max(19px,var(--safe-bottom)) max(17px,var(--safe-left)); }
+}
+@media (max-width:720px) {
+  #rhythmSetDialog[open] {
+    bottom:var(--keyboard-inset,0px);
+    max-height:min(92dvh,calc(100dvh - var(--keyboard-inset,0px) - max(10px,var(--safe-top))));
+    scroll-padding:12px 0 65px;
+  }
+  #rhythmSetDialog #rhythmSubmit {
+    position:sticky; bottom:0; z-index:1; box-shadow:0 0 0 4px var(--surface);
+  }
+}

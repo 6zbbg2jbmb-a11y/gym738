@@ -578,15 +578,14 @@
       return state.workouts[key] || { weight: '', reps: '', done: false };
     }
 
-    function setSetData(week, exId, setIdx, patch) {
+    function setSetData(week, exId, setIdx, patch, target = state) {
       const key = `w${week}_${exId}_s${setIdx}`;
       const current = getSetData(week, exId, setIdx);
-      state.workouts[key] = Object.assign({}, current, patch);
-      saveState();
+      target.workouts[key] = Object.assign({}, current, patch);
+      return saveState(target);
     }
 
-    function getRepRange(ex) {
-      const variantIdx = state.selectedVariants[ex.id] || 0;
+    function getRepRange(ex, variantIdx = state.selectedVariants[ex.id] || 0) {
       if (ex.id === 'lb_main' && variantIdx === 1) {
         return { min: ex.altMinReps, max: ex.altMaxReps };
       }
@@ -769,6 +768,10 @@
     function renderWorkoutDay(dayKey) {
       const day = PROGRAM[dayKey];
       const week = Number(state.currentWeek);
+      const rhythmAvailable = Boolean(window.renderWorkoutRhythm && window.openRhythmSet && document.getElementById('rhythmSetDialog'));
+      const view = week + '/' + dayKey;
+      const lastLog = document.getElementById('fullWorkoutLog');
+      const openLog = lastLog?.dataset.view === view && lastLog.open;
       const prevWeek = (week > 2 && (week - 1) % 8 === 0) ? week - 2 : week - 1;
       const dayNames = {upperA:'Верх А', lowerA:'Низ А', upperB:'Верх Б', lowerB:'Низ Б'};
       const weekdays = {upperA:'Понедельник', lowerA:'Вторник', upperB:'Четверг', lowerB:'Пятница'};
@@ -785,6 +788,7 @@
         <nav class="day-switcher" aria-label="Тренировочный день">
           ${Object.entries(dayNames).map(([key, name]) => `<button type="button" id="tab-${key}" onclick="selectTab('${key}')" aria-pressed="${key === dayKey}">${name}</button>`).join('')}
         </nav>
+        ${rhythmAvailable ? `<section id="rhythmRoot"></section><details id="fullWorkoutLog" data-view="${view}" ${openLog ? 'open' : ''}><summary>Все упражнения и записи</summary>` : ''}
         <section class="day-summary" aria-labelledby="dayTitle">
           <p class="eyebrow">${weekdays[dayKey]} · Неделя ${week}</p>
           <h2 id="dayTitle">${dayNames[dayKey]}</h2>
@@ -846,7 +850,8 @@
           </details>
         </article>`;
       });
-      document.getElementById('mainContainer').innerHTML = html + '</div>';
+      document.getElementById('mainContainer').innerHTML = html + '</div>' + (rhythmAvailable ? '</details>' : '');
+      if (rhythmAvailable) renderWorkoutRhythm(dayKey);
     }
 
     function onSetInput(week, exId, setIdx, field, rawValue) {
@@ -880,6 +885,7 @@
             progEl.textContent = cleanLabel(prog.badge);
           }
         }
+        window.renderWorkoutRhythm?.(state.currentTab);
       }
     }
 
@@ -1143,7 +1149,7 @@
     }
 
     function exportCSV() {
-      const rows = [['Неделя', 'День', 'Упражнение', 'Подход', 'Вес (кг)', 'Повторы', 'Выполнено', 'Заметка']];
+      const rows = [['Неделя', 'День', 'Упражнение', 'Подход', 'Вес (кг)', 'Повторы', 'Выполнено', 'Заметка', 'Повторов в запасе']];
       for (let w = 1; w <= 16; w++) {
         Object.values(PROGRAM).forEach(day => {
           day.exercises.forEach(ex => {
@@ -1159,7 +1165,8 @@
                   d.weight,
                   d.reps,
                   d.done ? 'Да' : 'Нет',
-                  note
+                  note,
+                  d.effort ?? ''
                 ]);
               }
             }
@@ -1286,7 +1293,7 @@
     const bootPromise = boot();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(reg => {
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
         reg.update().catch(() => {});
       }).catch(() => {});
     }

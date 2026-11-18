@@ -1,10 +1,14 @@
 const CACHE_PREFIX = 'gym738-cache-';
-const CACHE_NAME = `${CACHE_PREFIX}v9`;
+const CACHE_NAME = `${CACHE_PREFIX}v10`;
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './app.js',
+  './graphite.css',
+  './rhythm.css',
+  './rhythm.js',
+  './rhythm-form.js',
   './app.css',
   './views.js',
   './views.css',
