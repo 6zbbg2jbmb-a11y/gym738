@@ -149,7 +149,7 @@ function renderStats(blockStart) {
           <h3 class="view-group-title" id="view-day-${dayIndex}">${escapeHtml(day.title)}</h3>
           ${day.exercises.map(ex => `
             <article class="view-surface view-stat-card">
-              <h4 class="view-exercise-name">${escapeHtml(ex.name)}</h4>
+              <h4 class="view-exercise-name">${escapeHtml(ex.variants ? cleanLabel(ex.variants[state.selectedVariants[ex.id] || 0]) : ex.name)}</h4>
               <dl class="view-week-grid">
                 ${weeks.map(week => {
                   let bestSet = null;

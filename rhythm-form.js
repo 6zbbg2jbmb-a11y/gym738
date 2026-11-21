@@ -19,23 +19,37 @@
     byId('rhythmSetTitle').textContent = rhythmExerciseLabel(ex, selected);
     byId('rhythmSetPlan').textContent = range.min + '–' + range.max + ' повторов · ' + ex.rir + ' · отдых ' + formatTime(ex.restSec);
     reps.placeholder = range.min + '–' + range.max;
-    // The original program supplies an exercise-level note for its primary variant.
-    const technique = byId('rhythmTechnique');
-    const tip = technique.querySelector('p');
-    tip.hidden = !ex.note || selected !== 0;
-    tip.textContent = ex.note || '';
+    // One-line notes describe the primary variant only; step-by-step technique exists per variant.
+    const lines = ex.technique || selected === 0 ? techniqueLines(ex, selected) : [];
+    const tip = byId('rhythmTechnique').querySelector('.technique');
+    tip.hidden = !lines.length;
+    tip.replaceChildren(...lines.map(line => Object.assign(document.createElement('li'), { textContent: line })));
+    showPrevious(selected);
+  }
+
+  // Each variant has its own history, so the offered copy follows the selected one.
+  function showPrevious(selected) {
+    const { week, exercise, setNumber } = entry;
+    const pastWeek = week > 2 && (week - 1) % 8 === 0 ? week - 2 : week - 1;
+    const source = { workouts: state.workouts, selectedVariants: { ...state.selectedVariants, [exercise.id]: selected } };
+    const past = pastWeek > 0 ? getSetData(pastWeek, exercise.id, setNumber, source) : null;
+    entry.past = past;
+    const previousLabel = past && [
+      past.weight !== '' && past.weight != null ? String(past.weight).replace('.', ',') + ' кг' : '',
+      past.reps !== '' && past.reps != null ? past.reps + ' повт.' : ''
+    ].filter(Boolean).join(' × ');
+    previous.hidden = !previousLabel;
+    previous.textContent = previousLabel ? 'Взять с недели ' + pastWeek + ' · ' + previousLabel : '';
   }
 
   window.openRhythmSet = (dayKey, exerciseIndex, setNumber) => {
     const exercise = PROGRAM[dayKey].exercises[exerciseIndex];
     const week = Number(state.currentWeek);
     const record = getSetData(week, exercise.id, setNumber);
-    const pastWeek = week > 2 && (week - 1) % 8 === 0 ? week - 2 : week - 1;
-    const past = pastWeek > 0 ? getSetData(pastWeek, exercise.id, setNumber) : null;
     const active = document.activeElement;
     const returnSelector = active?.matches('[data-main]') ? '[data-main]' : '[data-log="' + exerciseIndex + ':' + setNumber + '"]';
     const noteKey = 'w' + week + '_' + exercise.id;
-    entry = { week, exercise, setNumber, past, returnSelector, noteKey };
+    entry = { week, exercise, setNumber, past: null, returnSelector, noteKey };
     form.reset();
     error.hidden = true;
     byId('rhythmTechnique').open = false;
@@ -49,12 +63,6 @@
     weight.value = untouched && priorSet?.done ? priorSet.weight : record.weight ?? '';
     reps.value = record.reps ?? '';
     effort.value = record.effort == null ? '' : String(record.effort);
-    const previousLabel = past && [
-      past.weight !== '' && past.weight != null ? String(past.weight).replace('.', ',') + ' кг' : '',
-      past.reps !== '' && past.reps != null ? past.reps + ' повт.' : ''
-    ].filter(Boolean).join(' × ');
-    previous.hidden = !previousLabel;
-    previous.textContent = previousLabel ? 'Взять с недели ' + pastWeek + ' · ' + previousLabel : '';
     byId('rhythmUndo').hidden = !record.done;
     byId('rhythmSubmit').textContent = record.done ? 'Сохранить изменения' : 'Записать подход';
     updatePlan();
@@ -126,14 +134,16 @@
     const rawReps = reps.value.trim();
     const { exercise, week, setNumber } = entry;
     const record = getSetData(week, exercise.id, setNumber);
-    const retainedLegacyReps = record.done && rawReps === String(record.reps ?? '');
+    // A new variant is written to its own record, so every field must be sent, not only the edited ones.
+    const variantChanged = Boolean(exercise.variants) && Number(variant.value) !== Number(state.selectedVariants[exercise.id] || 0);
+    const retainedLegacyReps = !variantChanged && record.done && rawReps === String(record.reps ?? '');
     if (!retainedLegacyReps && (!/^\d+$/.test(rawReps) || !Number.isSafeInteger(Number(rawReps)) || Number(rawReps) < 1)) {
       return invalid(reps, 'Введи количество повторов целым числом от 1.');
     }
     const patch = { done: true };
-    if (String(record.weight ?? '') !== weight.value) patch.weight = rawWeight;
-    if (String(record.reps ?? '') !== reps.value) patch.reps = String(Number(rawReps));
-    if (effort.selectedIndex >= 0 && effort.value !== String(record.effort ?? '')) patch.effort = effort.value;
+    if (variantChanged || String(record.weight ?? '') !== weight.value) patch.weight = rawWeight;
+    if (variantChanged || String(record.reps ?? '') !== reps.value) patch.reps = String(Number(rawReps));
+    if (effort.selectedIndex >= 0 && (variantChanged || effort.value !== String(record.effort ?? ''))) patch.effort = effort.value;
     commit(patch, true);
   });
 

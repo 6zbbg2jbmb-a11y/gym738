@@ -99,6 +99,8 @@ summary::-webkit-details-marker { display: none; }
 .exercise-details[open] > summary::after { content:'−'; }
 .exercise-detail-content { padding-bottom:18px; display:grid; gap:16px; }
 .exercise-detail-content p { color:var(--muted); font-size:15px; line-height:1.65; }
+.technique { margin:0; padding-left:20px; color:var(--muted); font-size:15px; line-height:1.55; }
+.technique li + li { margin-top:8px; }
 .field-label { display:block; color:var(--muted); font-size:13px; margin-bottom:8px; }
 .exercise-detail-content select { width:100%; padding:12px; text-overflow:ellipsis; }
 .variant-options { display:grid; gap:8px; }
