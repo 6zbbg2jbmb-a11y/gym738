@@ -12,15 +12,15 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="app.css?v=11" />
   <link rel="stylesheet" href="views.css" />
-  <link rel="stylesheet" href="graphite.css" />
+  <link rel="stylesheet" href="graphite.css?v=11" />
   <link rel="stylesheet" href="rhythm.css" />
   <title>GYM738 — Дневник тренировок</title>
-  <script src="views.js" defer></script>
-  <script src="rhythm.js" defer></script>
-  <script src="rhythm-form.js" defer></script>
-  <script src="app.js?v=10" defer></script>
+  <script src="views.js?v=11" defer></script>
+  <script src="rhythm.js?v=11" defer></script>
+  <script src="rhythm-form.js?v=11" defer></script>
+  <script src="app.js?v=11" defer></script>
 </head>
 <body>
   <header class="app-header" id="appHeader">
@@ -107,7 +107,7 @@
         <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4+">4 и больше</option>
       </select></label>
       <details id="rhythmTechnique"><summary>Техника и моя заметка</summary>
-        <p></p><label>Заметка к упражнению на эту неделю<textarea id="rhythmNote" rows="2" placeholder="Например, высота сиденья"></textarea></label>
+        <ul class="technique"></ul><label>Заметка к упражнению на эту неделю<textarea id="rhythmNote" rows="2" placeholder="Например, высота сиденья"></textarea></label>
       </details>
       <p id="rhythmSetError" role="alert" hidden></p>
       <button id="rhythmPrevious" type="button" hidden></button>

@@ -120,7 +120,7 @@ dialog::backdrop { background:#100e0bcc; }
 #rhythmTechnique { border-block:1px solid var(--line); }
 #rhythmTechnique > summary { display:flex; align-items:center; justify-content:space-between; cursor:pointer; list-style:none; font-size:14px; font-weight:570; }
 #rhythmTechnique[open] { padding-bottom:12px; }
-#rhythmTechnique p { margin:6px 0 9px; }
+#rhythmTechnique .technique { margin:6px 0 12px; }
 #rhythmPrevious,#rhythmSubmit,#rhythmUndo {
   padding:9px 13px; text-align:center; border:1px solid var(--edge); border-radius:10px;
   background:var(--light); color:var(--ink); font-size:14px; font-weight:560;

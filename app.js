@@ -197,7 +197,14 @@
             restLabel: '2.5–3 мин',
             muscle: 'Верх груди',
             step: 2,
-            note: 'СОЛО: угол строго 30° (1–2 деления вверх). Закидывай гантели коленями, локти под углом 45–60° к ребрам. Опускай глубоко с паузой 0.5 сек в растяжении. В конце прими гантели на колени и сядь.'
+            technique: [[
+              'Скамья: спинка на 30° (1–2 деления от горизонтали). Если плечам неудобно, можно поднять до 45°.',
+              'Как взять гантели одному: сядь, поставь гантели вертикально на бёдра у колен, ложись назад и одновременно толкни их коленями к груди.',
+              'Старт: лопатки сведены и опущены, грудь чуть приподнята, стопы упираются в пол. Гантели над плечами, кисти ровно над локтями.',
+              'Вниз за 2–3 секунды: локти под 45–60° к корпусу, не в стороны. Опускай до заметного растяжения груди, внизу пауза 0,5 секунды без расслабления.',
+              'Вверх: жми вверх и немного к центру, гантели не стукай. Лопатки прижаты к скамье, таз не отрывай.',
+              'Конец подхода: опусти гантели к груди, подтяни колени и садись, перекатывая гантели на бёдра. Не бросай их в стороны с прямых рук.'
+            ]]
           },
           {
             id: 'ub_pullups',
@@ -210,12 +217,19 @@
             restLabel: '2.5–3 мин',
             muscle: 'Широчайшие',
             step: 2.5,
-            note: 'Хват чуть шире плеч (можно с лямками). Внизу полное растяжение, вверху тянись грудью к турнику. Если со своим весом — пиши 0 кг (или 73 кг).'
+            technique: [[
+              'Хват: прямой, чуть шире плеч. Лямки можно, если хват устаёт раньше спины.',
+              'Старт: полный вис на прямых руках. Перед первым повтором слегка опусти плечи вниз, от ушей.',
+              'Вверх: тяни локти вниз к бокам, грудь к перекладине, подбородок выше перекладины. Без раскачки и рывков ногами.',
+              'Вниз за 2 секунды до прямых рук. Повтор без полного разгибания рук не считается.',
+              'Вес записывай только дополнительный: 0 — без отягощения, с поясом — вес блинов. Те же повторы при большем весе тела — тоже прогресс.',
+              'Меньше 6 чистых повторов — пока делай тягу верхнего блока или гравитрон. Все подходы по 10 — добавь 2,5 кг на поясе.'
+            ]]
           },
           {
             id: 'ub_dips_hammer',
             name: 'Жим в Хаммере / Отжимания на брусьях с весом',
-            variants: ['Жим в тренажере Хаммер ✅', 'Брусья с весом (наклон вперед)'],
+            variants: ['Жим в тренажере Хаммер', 'Отжимания на брусьях (наклон вперёд) ✅'],
             sets: 3,
             minReps: 8,
             maxReps: 12,
@@ -224,7 +238,20 @@
             restLabel: '2 мин',
             muscle: 'Грудь / Трицепс',
             step: 2.5,
-            note: 'СОЛО: Хаммер безопаснее для плеч на RIR 1. На брусьях наклоняй корпус вперед на 25° и опускайся до угла 90° в локтях без дискомфорта в плечах.'
+            technique: [[
+              'Сиденье: рукояти на уровне середины груди. Спина и лопатки прижаты к спинке.',
+              'Вниз за 2–3 секунды до растяжения груди, локти под 45–60° к корпусу. Плечи не уходят вперёд за рукоятями.',
+              'Вверх: жми, не отрывая лопатки от спинки, локти в конце не защёлкивай.',
+              'Тренажёр безопасен без страхующего, последний подход можно доводить до отказа.'
+            ], [
+              'Только если спереди плеча нет боли. Появилась боль или щелчки с болью — вернись на Хаммер.',
+              'Брусья примерно по ширине плеч, на V-образных бери ближе к узкой части. Слишком широкие сильнее нагружают плечевой сустав.',
+              'Старт: руки прямые, плечи опущены от ушей, ноги согнуты и скрещены. Наклони корпус вперёд на 20–30° — так больше работает грудь, вертикальный корпус смещает нагрузку на трицепс.',
+              'Вниз за 2–3 секунды до 90° в локтях (плечо на уровне локтя). Глубже — только если плечу комфортно. Внизу без отскока.',
+              'Вверх: выжимай до почти прямых рук, локти не разводи широко в стороны.',
+              'Вес записывай только дополнительный: 0 — свой вес. Сначала доведи все подходы до 12 повторов, потом пояс +2,5 кг. Меньше 8 повторов со своим весом — гравитрон или Хаммер.',
+              'Отжимания от скамьи сзади брусья не заменяют: плечо там уходит назад ещё сильнее.'
+            ]]
           },
           {
             id: 'ub_cable_row',
@@ -237,7 +264,12 @@
             restLabel: '2 мин',
             muscle: 'Середина спины',
             step: 2.5,
-            note: 'С лямками! На негативной фазе не качай поясницей, но подавай плечи и лопатки вперед (растягивая трапеции и ромбовидные под нагрузкой), затем своди лопатки и тяни к поясу.'
+            technique: [[
+              'Сядь, стопы на платформе, колени слегка согнуты. Рукоять — узкая V или любая удобная. Лямки, если хват устаёт раньше спины.',
+              'Старт: руки прямые, корпус почти вертикален. Лопатки можно отпустить вперёд за рукоятью, но поясница неподвижна.',
+              'Тяга: своди лопатки и веди локти назад вдоль корпуса к поясу. Грудь вперёд, плечи не поднимай.',
+              'Вниз за 2 секунды. Не раскачивайся: если отклоняешься назад больше чем на 10–15°, вес слишком большой.'
+            ]]
           },
           {
             id: 'ub_cable_lateral',
@@ -251,7 +283,17 @@
             restLabel: '1.5 мин',
             muscle: 'Средняя дельта',
             step: 1.25,
-            note: 'На блоке: ставь ролик на высоту кисти/колена и держись за стойку. Если на блоке неудобный шаг плиток — сядь на скамью (наклон 15° вперед) и веди гантели чуть вперед на 30° в плоскости лопатки.'
+            technique: [[
+              'Ролик на высоте кисти или колена. Встань боком к блоку, рукоять в дальней руке, свободной рукой держись за стойку.',
+              'Рука чуть согнута в локте, угол не меняется. Поднимай через сторону до уровня плеча, ведя локтем, а не кистью.',
+              'Кисть не выше локтя, мизинец вверх не поворачивай. Плечо к уху не поднимай.',
+              'Вниз за 2 секунды до самого низа, вес не бросай, корпус не раскачивай.',
+              'Подходы делай по очереди на каждую руку. Шаг плиток большой — сначала доведи все подходы до 15 повторов, потом добавляй вес.'
+            ], [
+              'Сядь на край скамьи, корпус наклонён вперёд на 15°, гантели по бокам.',
+              'Поднимай чуть впереди корпуса (под 30° вперёд) до уровня плеч. Ведёт локоть, кисть не выше локтя, локоть чуть согнут.',
+              'Вниз за 2 секунды без рывков корпусом. Если приходится раскачиваться — вес слишком большой.'
+            ]]
           },
           {
             id: 'ub_preacher_curl',
@@ -264,7 +306,13 @@
             restLabel: '1.5 мин',
             muscle: 'Бицепс',
             step: 2.5,
-            note: 'СОЛО: подмышки плотно на краю подушки. Опускай EZ-гриф медленно (2–3 сек) почти до конца (оставляя микро-угол 5° в локте, без рывка снизу!).'
+            technique: [[
+              'Сиденье: подмышки плотно лежат на верхнем крае подушки, плечи прижаты по всей длине.',
+              'Хват EZ-грифа на изгибах, ширина — как удобно запястьям.',
+              'Вверх: сгибай до вертикального положения предплечий. Локти не отрывай от подушки, корпус не откидывай.',
+              'Вниз за 2–3 секунды почти до прямых рук, оставь небольшой угол в локте. Внизу без отскока: здесь самая большая нагрузка на локоть.',
+              'При отказе не дёргай гриф снизу — опусти его на подушку или на стойку.'
+            ]]
           }
         ]
       },
@@ -469,6 +517,7 @@
 
     function getDefaultState() {
       return {
+        schema: 2,
         currentWeek: 1,
         currentTab: 'upperA',
         selectedVariants: {},
@@ -535,7 +584,24 @@
       for (const item of Object.values(result.dailyChecklist)) {
         if (!isRecord(item) || Object.values(item).some(flag => typeof flag !== 'boolean')) throw new Error('Invalid checklist');
       }
+      if (value.schema !== 2) moveLegacyVariantRecords(result);
+      result.schema = 2;
       return result;
+    }
+
+    // Before schema 2 every variant shared one key; attribute those records to the variant chosen at upgrade.
+    function moveLegacyVariantRecords(data) {
+      for (const [exId, variant] of Object.entries(data.selectedVariants)) {
+        if (!variant) continue;
+        for (const key of Object.keys(data.workouts)) {
+          const match = key.match(/^w(\d+)_(.+)_s(\d+)$/);
+          if (!match || match[2] !== exId) continue;
+          const target = workoutKey(match[1], exId, match[3], data.selectedVariants);
+          if (Object.hasOwn(data.workouts, target)) continue;
+          data.workouts[target] = data.workouts[key];
+          delete data.workouts[key];
+        }
+      }
     }
 
     function setSaveStatus(message, error = false) {
@@ -573,15 +639,19 @@
       return saved;
     }
 
-    function getSetData(week, exId, setIdx) {
-      const key = `w${week}_${exId}_s${setIdx}`;
-      return state.workouts[key] || { weight: '', reps: '', done: false };
+    // Variant 0 keeps the original key, so existing records and backups stay readable.
+    function workoutKey(week, exId, setIdx, variants = state.selectedVariants) {
+      const variant = variants[exId] || 0;
+      return `w${week}_${exId}${variant ? `_v${variant}` : ''}_s${setIdx}`;
+    }
+
+    function getSetData(week, exId, setIdx, source = state) {
+      return source.workouts[workoutKey(week, exId, setIdx, source.selectedVariants)] || { weight: '', reps: '', done: false };
     }
 
     function setSetData(week, exId, setIdx, patch, target = state) {
-      const key = `w${week}_${exId}_s${setIdx}`;
-      const current = getSetData(week, exId, setIdx);
-      target.workouts[key] = Object.assign({}, current, patch);
+      const key = workoutKey(week, exId, setIdx, target.selectedVariants);
+      target.workouts[key] = Object.assign({}, getSetData(week, exId, setIdx, target), patch);
       return saveState(target);
     }
 
@@ -590,6 +660,11 @@
         return { min: ex.altMinReps, max: ex.altMaxReps };
       }
       return { min: ex.minReps, max: ex.maxReps };
+    }
+
+    // Upper B has step-by-step technique per variant; other exercises keep their one-line note.
+    function techniqueLines(ex, variant) {
+      return ex.technique ? (ex.technique[variant] || []) : [ex.note].filter(Boolean);
     }
 
     // Нормализация ввода для русской клавиатуры iPhone (заменяет запятую "," на точку ".")
@@ -843,7 +918,7 @@
           <details class="exercise-details" ${openTips[ex.id] ? 'open' : ''} ontoggle="rememberDetails('${ex.id}',this.open)">
             <summary>Техника${ex.variants ? ', варианты' : ''} и заметки${state.notes[noteKey] ? ' · Есть заметка' : ''}</summary>
             <div class="exercise-detail-content">
-              <p>${escapeHtml(ex.note)}</p>
+              <ul class="technique">${techniqueLines(ex, variantIdx).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
               ${ex.variants ? `<div><span class="field-label">Вариант упражнения</span><div class="variant-options">${ex.variants.map((v,i) => `<button type="button" aria-pressed="${i===variantIdx}" onclick="selectVariant('${ex.id}',${i})">${escapeHtml(cleanLabel(v))}</button>`).join('')}</div></div>` : ''}
               <div><label class="field-label" for="note-${ex.id}">Заметка к упражнению</label><textarea id="note-${ex.id}" rows="2" placeholder="Настройки тренажёра, ощущения…" oninput="onNoteInput('${noteKey}',this.value)">${escapeHtml(state.notes[noteKey] || '')}</textarea></div>
             </div>
@@ -895,19 +970,12 @@
       const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
       const prev = prevWeek >= 1 ? getSetData(prevWeek, exId, setIdx) : { weight: '', reps: '' };
       const set1 = getSetData(week, exId, 1);
+      const baseRep = cur.reps !== '' ? Number(cur.reps) : (prev.reps !== '' ? Number(prev.reps) : defaultMin);
 
-      let baseRep = cur.reps !== '' ? Number(cur.reps) : (prev.reps !== '' ? Number(prev.reps) : defaultMin);
-      let nextRep = Math.max(0, baseRep + delta);
-
-      let nextWeight = cur.weight;
-      if (nextWeight === '') {
-        if (set1.weight !== '') nextWeight = set1.weight;
-        else if (prev.weight !== '') nextWeight = prev.weight;
-      }
-
+      // Last week's weight is not copied: the progression badge may ask for a heavier one.
       setSetData(week, exId, setIdx, {
-        weight: nextWeight,
-        reps: String(nextRep)
+        weight: cur.weight === '' ? set1.weight : cur.weight,
+        reps: String(Math.max(0, baseRep + delta))
       });
       render();
     }
@@ -927,29 +995,19 @@
     }
 
     function toggleSetDone(week, exId, setIdx, restSec) {
+      const cur = getSetData(week, exId, setIdx);
+      // A set without reps is not logged; the reps field asks for the real number instead of last week's.
+      if (!cur.done && cur.reps === '') {
+        document.getElementById(`inp-r-${exId}-${setIdx}`)?.focus();
+        return;
+      }
       dismissKeyboard();
       unlockAudio();
 
-      const cur = getSetData(week, exId, setIdx);
-      const prevWeek = (week > 1 && (week - 1) % 8 === 0 && week > 2) ? week - 2 : week - 1;
-      const prev = prevWeek >= 1 ? getSetData(prevWeek, exId, setIdx) : { weight: '', reps: '' };
       const set1 = getSetData(week, exId, 1);
-
-      let nextWeight = cur.weight;
-      let nextReps = cur.reps;
-
-      if (nextWeight === '') {
-        if (set1.weight !== '') nextWeight = set1.weight;
-        else if (prev.weight !== '') nextWeight = prev.weight;
-      }
-      if (nextReps === '' && prev.reps !== '') {
-        nextReps = prev.reps;
-      }
-
       const nextDone = !cur.done;
       setSetData(week, exId, setIdx, {
-        weight: nextWeight,
-        reps: nextReps,
+        weight: cur.weight === '' ? set1.weight : cur.weight,
         done: nextDone
       });
 
@@ -1154,22 +1212,26 @@
         Object.values(PROGRAM).forEach(day => {
           day.exercises.forEach(ex => {
             const note = state.notes[`w${w}_${ex.id}`] || '';
-            for (let s = 1; s <= ex.sets; s++) {
-              const d = getSetData(w, ex.id, s);
-              if (d.weight !== '' || d.reps !== '' || note !== '') {
-                rows.push([
-                  w,
-                  day.title,
-                  ex.name,
-                  s,
-                  d.weight,
-                  d.reps,
-                  d.done ? 'Да' : 'Нет',
-                  note,
-                  d.effort ?? ''
-                ]);
+            const current = state.selectedVariants[ex.id] || 0;
+            (ex.variants || [ex.name]).forEach((label, variant) => {
+              const source = { workouts: state.workouts, selectedVariants: { [ex.id]: variant } };
+              for (let s = 1; s <= ex.sets; s++) {
+                const d = getSetData(w, ex.id, s, source);
+                if (d.weight !== '' || d.reps !== '' || (note !== '' && variant === current)) {
+                  rows.push([
+                    w,
+                    day.title,
+                    cleanLabel(label),
+                    s,
+                    d.weight,
+                    d.reps,
+                    d.done ? 'Да' : 'Нет',
+                    note,
+                    d.effort ?? ''
+                  ]);
+                }
               }
-            }
+            });
           });
         });
       }
