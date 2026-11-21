@@ -517,10 +517,10 @@
 
     function getDefaultState() {
       return {
-        schema: 2,
+        schema: 3,
         currentWeek: 1,
         currentTab: 'upperA',
-        selectedVariants: {},
+        selectedVariants: { ub_dips_hammer: 1 },
         workouts: {},
         notes: {},
         bodyWeight: {},
@@ -584,8 +584,11 @@
       for (const item of Object.values(result.dailyChecklist)) {
         if (!isRecord(item) || Object.values(item).some(flag => typeof flag !== 'boolean')) throw new Error('Invalid checklist');
       }
-      if (value.schema !== 2) moveLegacyVariantRecords(result);
-      result.schema = 2;
+      const schema = Number.isInteger(value.schema) ? value.schema : 1;
+      if (schema < 2) moveLegacyVariantRecords(result);
+      // Schema 3: Upper B's second press switches to dips once; Hammer records stay under Hammer.
+      if (schema < 3) result.selectedVariants.ub_dips_hammer = 1;
+      result.schema = 3;
       return result;
     }
 
